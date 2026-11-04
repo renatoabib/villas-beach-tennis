@@ -2,7 +2,7 @@
 <nav class="navbar navbar-expand-md navbar-light default">
     <div class="container">
         <a class="navbar-brand" href="{{ url('index') }}">
-            <img src="{{ asset('assets/images/logo/monasso.png') }}" alt="logo" class="logo-lg landing-logo" />
+            <img src="{{ asset('assets/images/logo/villas.jpg') }}" alt="logo" class="logo-lg landing-logo" />
         </a>
         <button class="navbar-toggler rounded" type="button" data-bs-toggle="collapse"
             data-bs-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false"

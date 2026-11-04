@@ -25,10 +25,10 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-4">
-                    <img src="{{ asset('assets/images/logo/monasso.png') }}" alt="image"
+                    <img src="{{ asset('assets/images/logo/villas.jpg') }}" alt="image"
                         class="footer-logo img-fluid mb-3" />
                     <p class="mb-4">Since 2014, over 6.3K developers have placed their trust in Rochdi & Halima's
-                        Templates. Mon Asso is managed by their
+                        Templates. Villas Beach Tennis is managed by their
                         experienced team of professionals.</p>
                 </div>
                 <div class="col-md-8">

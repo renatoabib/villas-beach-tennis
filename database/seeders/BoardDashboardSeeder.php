@@ -35,7 +35,7 @@ class BoardDashboardSeeder extends Seeder
 
             // Check or create Association
             $association = Association::firstOrCreate(
-                ['email' => "board_assoc$a@monasso.com"],
+                ['email' => "board_assoc$a@villasbeachtennis.com.br"],
                 [
                     'name' => "Board Assoc $a",
                     'address' => $faker->address,
@@ -48,7 +48,7 @@ class BoardDashboardSeeder extends Seeder
 
             // Create or retrieve the board user
             $boardUser = User::firstOrCreate(
-                ['email' => "board_user$a@monasso.com"],
+                ['email' => "board_user$a@villasbeachtennis.com.br"],
                 [
                     'name' => "Board User $a",
                     'password' => Hash::make('password'),
@@ -64,7 +64,7 @@ class BoardDashboardSeeder extends Seeder
             $members = [];
             foreach (range(1, 20) as $i) {
                 $member = User::firstOrCreate(
-                    ['email' => "assoc{$a}_member{$i}@monasso.com"],
+                    ['email' => "assoc{$a}_member{$i}@villasbeachtennis.com.br"],
                     [
                         'name' => "Assoc{$a}_Member{$i}",
                         'password' => Hash::make('password'),

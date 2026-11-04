@@ -23,7 +23,7 @@ class SupervisorDashboardSeeder extends Seeder
 
         // Create association
         $association = Association::firstOrCreate(
-            ['email' => 'supervisor_assoc@monasso.com'],
+            ['email' => 'supervisor_assoc@villasbeachtennis.com.br'],
             [
                 'name' => 'Supervisor Dashboard Association',
                 'address' => $faker->address,
@@ -36,7 +36,7 @@ class SupervisorDashboardSeeder extends Seeder
 
         // Create supervisor user
         $supervisor = User::firstOrCreate(
-            ['email' => 'supervisor@monasso.com'],
+            ['email' => 'supervisor@villasbeachtennis.com.br'],
             [
                 'name' => 'Supervisor User',
                 'password' => Hash::make('password'),
@@ -53,7 +53,7 @@ class SupervisorDashboardSeeder extends Seeder
         $members = [];
         for ($i = 1; $i <= 145; $i++) {
             $user = User::firstOrCreate(
-                ['email' => "supervisor_member_$i@monasso.com"],
+                ['email' => "supervisor_member_$i@villasbeachtennis.com.br"],
                 [
                     'name' => "New Member $i",
                     'password' => Hash::make('password'),

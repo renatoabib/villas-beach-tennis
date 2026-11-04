@@ -15,7 +15,7 @@
             <div id="liveToast" class="toast hide" role="alert" aria-live="assertive" aria-atomic="true">
                 <div class="toast-header">
                     <img src="{{ asset('favicon.svg') }}" class="img-fluid me-2" alt="favicon" style="width: 17px">
-                    <strong class="me-auto">MonAsso</strong>
+                    <strong class="me-auto">Villas Beach Tennis</strong>
                     <small>Just now</small>
                     <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
                 </div>

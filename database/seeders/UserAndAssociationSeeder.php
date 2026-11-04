@@ -15,7 +15,7 @@ class UserAndAssociationSeeder extends Seeder
             $association = Association::create([
                 'name' => "Association $i",
                 'address' => "Address $i",
-                'email' => "association$i@monasso.com",
+                'email' => "association$i@villasbeachtennis.com.br",
                 'announcement_status' => fake()->sentence,
                 'creation_date' => now()->subYears(rand(1,5)),
                 'is_validated' => true,
@@ -24,7 +24,7 @@ class UserAndAssociationSeeder extends Seeder
 
             $superAdmin = User::create([
                 'name' => "SuperAdmin $i",
-                'email' => "superadmin$i@monasso.com",
+                'email' => "superadmin$i@villasbeachtennis.com.br",
                 'password' => Hash::make('password'),
                 'phone' => fake()->phoneNumber,
                 'association_id' => $association->id,
@@ -36,7 +36,7 @@ class UserAndAssociationSeeder extends Seeder
 
             $admin = User::create([
                 'name' => "Admin $i",
-                'email' => "admin$i@monasso.com",
+                'email' => "admin$i@villasbeachtennis.com.br",
                 'password' => Hash::make('password'),
                 'phone' => fake()->phoneNumber,
                 'association_id' => $association->id,
@@ -48,7 +48,7 @@ class UserAndAssociationSeeder extends Seeder
 
             $board = User::create([
                 'name' => "Board $i",
-                'email' => "board$i@monasso.com",
+                'email' => "board$i@villasbeachtennis.com.br",
                 'password' => Hash::make('password'),
                 'phone' => fake()->phoneNumber,
                 'association_id' => $association->id,
@@ -60,7 +60,7 @@ class UserAndAssociationSeeder extends Seeder
 
             $supervisor = User::create([
                 'name' => "Supervisor $i",
-                'email' => "supervisor$i@monasso.com",
+                'email' => "supervisor$i@villasbeachtennis.com.br",
                 'password' => Hash::make('password'),
                 'phone' => fake()->phoneNumber,
                 'association_id' => $association->id,
@@ -73,7 +73,7 @@ class UserAndAssociationSeeder extends Seeder
             for ($m = 1; $m <= 10; $m++) {
                 $member = User::create([
                     'name' => "Member {$i}_{$m}",
-                    'email' => "member{$i}_{$m}@monasso.com",
+                    'email' => "member{$i}_{$m}@villasbeachtennis.com.br",
                     'password' => Hash::make('password'),
                     'phone' => fake()->phoneNumber,
                     'association_id' => $association->id,

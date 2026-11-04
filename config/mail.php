@@ -99,7 +99,7 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'hello@monasso.com'),
+        'address' => env('MAIL_FROM_ADDRESS', 'contato@villasbeachtennis.com.br'),
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
 

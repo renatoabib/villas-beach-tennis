@@ -1,132 +1,112 @@
-# 🎯 MonAsso – SaaS Platform for Association Management
+# 🎾 Villas Beach Tennis — Plataforma de Gestão do Clube
 
-**MonAsso** is a modern and responsive SaaS web platform built to simplify the management of non-profit associations. It empowers associations to manage their members, meetings, contributions, events, documents, expenses, and statistics — all in one place.
-
-Built with **Laravel**, the system features modular design, dynamic dashboards, role-based access control, and a user-friendly admin panel.
-
----
-
-## 🖼️ Screenshots
-
-| Capture | Description |
-|--------|-------------|
-| ![Capture 1](https://raw.githubusercontent.com/Rochdi7/MonAsso/main/screenshots/Capture.PNG)   | 🏠 Landing Page |
-| ![Capture 2](https://raw.githubusercontent.com/Rochdi7/MonAsso/main/screenshots/Capture2.PNG)  | 🖥️ Dashboard with stats and charts |
-| ![Capture 3](https://raw.githubusercontent.com/Rochdi7/MonAsso/main/screenshots/Capture3.PNG)  | 📊 Statistics module with filters |
-| ![Capture 4](https://raw.githubusercontent.com/Rochdi7/MonAsso/main/screenshots/Capture4.PNG)  | 👥 Edit Profile |
-
-## 🚀 Key Features
-
-### 🔐 Role-Based Access Control
-Each user role has tailored access:
-- **Super Admin** – Full system access across all associations
-- **Admin** – Manages their own association (CRUD access)
-- **Board Member** – Supervises without delete permissions
-- **Supervisor** – Can create members, meetings, events, documents
-- **Member** – Views their own profile, meetings, and payments
+Plataforma web para gestão do **Villas Beach Tennis**, construída em **Laravel**.
+Reúne cadastro de sócios, mensalidades, reuniões, documentos, eventos, despesas
+e estatísticas em um único painel, com controle de acesso por perfil.
 
 ---
 
-## 🧩 Modules Overview
+## 🚀 Funcionalidades
 
-| Module         | Description                                                |
-|----------------|------------------------------------------------------------|
-| 👥 Members      | Add/edit members, upload photos, assign roles              |
-| 💰 Contributions | Record membership fees per year per user                  |
-| 📅 Meetings     | Schedule meetings with files and statuses                  |
-| 📁 Documents     | Manage attachments using Spatie MediaLibrary              |
-| 🎉 Events        | Create and manage association events                      |
-| 📊 Statistics    | View performance insights with dynamic ApexCharts         |
-| 💸 Expenses      | Track association expenses and budgets                    |
-| 🔐 Permissions   | Fine-grained access control using Spatie Permission       |
+### 🔐 Controle de acesso por perfil
+Cada perfil tem permissões próprias:
+- **Super Admin** – acesso total ao sistema
+- **Admin** – administra o clube (CRUD)
+- **Diretoria (Board)** – supervisiona sem permissão de exclusão
+- **Supervisor** – cadastra sócios, reuniões, eventos e documentos
+- **Sócio (Member)** – acessa o próprio perfil, reuniões e pagamentos
+
+### 🧩 Módulos
+
+| Módulo           | Descrição                                              |
+|------------------|--------------------------------------------------------|
+| 👥 Sócios         | Cadastro/edição, foto, atribuição de perfis             |
+| 💰 Mensalidades   | Registro de mensalidades por sócio e competência        |
+| 📅 Reuniões       | Agendamento com atas e arquivos                         |
+| 📁 Documentos      | Anexos via Spatie MediaLibrary                          |
+| 🎉 Eventos         | Criação e gestão de eventos do clube                    |
+| 📊 Estatísticas    | Indicadores com ApexCharts                              |
+| 💸 Despesas        | Controle de despesas e orçamento                        |
+| 🔐 Permissões      | Controle fino com Spatie Permission                     |
 
 ---
 
-## ⚙️ Tech Stack
+## ⚙️ Stack
 
 - **Framework**: Laravel 10+
 - **Frontend**: Blade, Bootstrap 5, Animate.css
-- **Charts**: ApexCharts.js
-- **File Uploads**: Spatie MediaLibrary
-- **Authentication**: Laravel Auth + Email Verification
-- **Roles/Permissions**: Spatie Laravel-Permission
-- **Database**: MySQL
-- **Deployment**: Optimized for Shared Hosting & VPS
+- **Gráficos**: ApexCharts.js
+- **Uploads**: Spatie MediaLibrary
+- **Autenticação**: Laravel Auth (cadastro público desativado)
+- **Perfis/Permissões**: Spatie Laravel-Permission
+- **Banco de dados**: MySQL
+- **Deploy**: Docker Compose + Nginx (Coolify)
 
 ---
 
-## 💻 Local Installation
+## 💻 Instalação local
 
 ```bash
-# 1. Clone the project
-git clone https://github.com/Rochdi7/MonAsso.git
-cd monasso
+# 1. Clone o projeto
+git clone git@github.com:renatoabib/villas-beach-tennis.git
+cd villas-beach-tennis
 
-# 2. Install dependencies
+# 2. Instale as dependências
 composer install
 
-# 3. Copy environment config and generate app key
+# 3. Configure o ambiente
 cp .env.example .env
 php artisan key:generate
 
-# 4. Configure your .env (DB credentials, mail, etc.)
+# 4. Ajuste o .env (banco, e-mail, APP_URL)
 
-# 5. Migrate and seed database
-php artisan migrate --seed
+# 5. Migre e popule o banco
+php artisan migrate
 
-# 6. Link storage (for profile photos/documents)
+# 6. Link do storage (fotos e documentos)
 php artisan storage:link
 
-# 7. Install frontend assets
+# 7. Assets do frontend
 npm install && npm run build
 
-# 8. Start the local server
+# 8. Suba o servidor local
 php artisan serve
 ```
 
 ---
 
-## 🧪 Default Admin Accounts
+## 🐳 Deploy com Docker (Coolify)
 
-| Role         | Email                | Password  |
-|--------------|----------------------|-----------|
-| Super Admin  | super@monasso.com    | password  |
-| Admin        | admin@monasso.com    | password  |
+O projeto inclui `docker-compose.yml` com três serviços:
 
-> You can customize these in the seeders or directly in the database.
+- **app** – PHP-FPM + Laravel
+- **db** – MySQL 8
+- **nginx** – servidor web (porta 80, SSL pelo proxy do Coolify)
 
----
+Variáveis principais no painel do Coolify:
 
-## 📈 Dashboard Features
-
-Each role sees a personalized dashboard:
-- **Admins**: Members, donations, meetings, cotisations, top contributors
-- **Super Admin**: All associations' global stats
-- **Board Members**: Read-only KPIs & decision summaries
-- **Members**: Their own data, meeting participation, payment history
-
----
-
-## 🤝 Credits
-
-Project by:  
-**Rochdi Karouali** & **Halima Dakir**  
-🎓 Final Year Project – École Racine Marrakech  
-🧑‍🏫 Supervised by Mr. Abdeldhamid Boukhrisse
+```
+APP_NAME="Villas Beach Tennis"
+APP_URL=https://villas.rcmasters.com.br
+APP_ENV=production
+APP_DEBUG=false
+DB_DATABASE=...
+DB_USERNAME=...
+DB_PASSWORD=...
+```
 
 ---
 
-## 📄 License
+## 📈 Dashboards
 
-This project is licensed under the [MIT License](LICENSE).
+Cada perfil vê um painel próprio:
+- **Admin**: sócios, mensalidades, reuniões, maiores contribuintes
+- **Super Admin**: visão geral de todos os clubes
+- **Diretoria**: indicadores e resumos para decisão
+- **Sócio**: dados próprios, participação em reuniões e histórico de pagamentos
 
 ---
 
-## 🌍 Live Demo
+## 📄 Licença
 
-> Coming soon
----
-
-## 👏 Contributions
-
-Pull requests, feature suggestions, and feedback are welcome!
+Uso interno do Villas Beach Tennis.

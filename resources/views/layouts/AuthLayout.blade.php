@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="description"
-        content="Mon Asso is trending dashboard template made using Laravel 11 &  Bootstrap 5 design framework. Mon Asso is available in Bootstrap, React, CodeIgniter, Angular,  and .net Technologies.">
+        content="Villas Beach Tennis is trending dashboard template made using Laravel 11 &  Bootstrap 5 design framework. Villas Beach Tennis is available in Bootstrap, React, CodeIgniter, Angular,  and .net Technologies.">
     <meta name="keywords"
         content="Laravel 11 Bootstrap admin template, Dashboard UI Kit, Dashboard Template, Backend Panel, react dashboard, angular dashboard">
     <meta name="author" content="phoenixcoded">

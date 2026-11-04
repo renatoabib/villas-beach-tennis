@@ -1,7 +1,7 @@
 /**
 =========================================================================
 =========================================================================
-Template Name: Mon Asso
+Template Name: Villas Beach Tennis
 Author: Rochdi & Halima
 Support: https://phoenixcoded.authordesk.app
 File: script.js
