@@ -122,6 +122,8 @@ Route::get('/test-error', function () {
     abort(500);
 });
 
+Route::get('/check/{memberNumber}', [CheckController::class, 'show'])->name('check.status');
+
 // === Fallback for 404 Not Found ===
 Route::fallback(function () {
     return response()->view('errors.404', [], 404);
