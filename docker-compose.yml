@@ -16,7 +16,7 @@ services:
       DB_PORT: ${DB_PORT:-3306}
       DB_DATABASE: ${DB_DATABASE:-monasso}
       DB_USERNAME: ${DB_USERNAME:-monasso}
-      DB_PASSWORD: ${DB_PASSWORD:-villas}
+      DB_PASSWORD: ${DB_PASSWORD:-monasso}
       SESSION_DRIVER: ${SESSION_DRIVER:-file}
       CACHE_STORE: ${CACHE_STORE:-file}
       QUEUE_CONNECTION: ${QUEUE_CONNECTION:-sync}
