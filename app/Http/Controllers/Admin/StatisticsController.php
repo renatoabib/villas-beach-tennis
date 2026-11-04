@@ -123,6 +123,7 @@ class StatisticsController extends Controller
             $cashflowLabels[] = $monthStart->format('M Y');
             $cashflowValues[] = $sumMembership + $sumCotisation + $sumContribution;
         }
+        $associationsTotal = \App\Models\Association::where('is_validated', true)->count();
         $associationsGrowthThisYear = \App\Models\Association::where('is_validated', true)
             ->whereYear('validation_date', now()->year)
             ->count();
@@ -225,6 +226,14 @@ class StatisticsController extends Controller
 
         $cotisationsPaidMAD = \App\Models\Cotisation::where('association_id', $associationId)
             ->where('status', 1)
+            ->sum('amount');
+
+        $cotisationsPendingMAD = \App\Models\Cotisation::where('association_id', $associationId)
+            ->where('status', 0)
+            ->sum('amount');
+
+        $cotisationsOverdueRejectedMAD = \App\Models\Cotisation::where('association_id', $associationId)
+            ->whereIn('status', [2, 3])
             ->sum('amount');
 
         $totalContributions = \App\Models\Contribution::where('association_id', $associationId)->sum('amount');
