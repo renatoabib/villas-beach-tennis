@@ -47,10 +47,22 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
         'password' => 'hashed',
     ];
 
-    // Relations
-    public function association()
+    protected static function boot()
     {
-        return $this->belongsTo(Association::class);
+        parent::boot();
+
+        static::creating(function ($user) {
+            if (empty($user->member_number)) {
+                $year = now()->format('Y');
+                $lastUser = User::whereNotNull('member_number')
+                                ->where('member_number', 'like', "VBT-{$year}-%")
+                                ->orderBy('id', 'desc')
+                                ->first();
+
+                $lastNumber = $lastUser ? (int)substr($lastUser->member_number, -4) : 0;
+                $user->member_number = sprintf('VBT-%s-%04d', $year, $lastNumber + 1);
+            }
+        });
     }
 
     public function cotisations()
