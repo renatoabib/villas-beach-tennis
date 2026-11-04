@@ -84,24 +84,41 @@
     </li>
   @endcan
 
-  {{-- Cotisations --}}
-  {{-- Members view their own cotisations via a specific route --}}
+  {{-- Mensalidades (Villas Beach Tennis) --}}
+  @role('member')
+    <li class="pc-item">
+    <a href="{{ route('membre.memberships.index') }}" class="pc-link">
+      <span class="pc-micon"><i class="ph-duotone ph-currency-circle-dollar"></i></span>
+      <span class="pc-mtext">Minhas Mensalidades</span>
+    </a>
+    </li>
+  @endrole
+
+  @hasanyrole('admin|superadmin|board')
+    <li class="pc-item">
+    <a href="{{ route('admin.memberships.index') }}" class="pc-link">
+      <span class="pc-micon"><i class="ph-duotone ph-currency-circle-dollar"></i></span>
+      <span class="pc-mtext">Mensalidades</span>
+    </a>
+    </li>
+  @endhasanyrole
+
+  {{-- Cotisations (Legado/Anual) --}}
   @can('view cotisations')
     @role('member')
     <li class="pc-item">
     <a href="{{ route('membre.cotisations.index') }}" class="pc-link">
       <span class="pc-micon"><i class="ph-duotone ph-receipt"></i></span>
-      <span class="pc-mtext" data-i18n="My Cotisations">My Cotisations</span>
+      <span class="pc-mtext" data-i18n="My Cotisations">Histórico Anual</span>
     </a>
     </li>
     @endrole
 
-    {{-- Admin, Superadmin, Board manage cotisations via their route --}}
     @hasanyrole('admin|superadmin|board')
     <li class="pc-item">
     <a href="{{ route('admin.cotisations.index') }}" class="pc-link">
       <span class="pc-micon"><i class="ph-duotone ph-receipt"></i></span>
-      <span class="pc-mtext" data-i18n="Cotisations">Manage Cotisations</span>
+      <span class="pc-mtext" data-i18n="Cotisations">Histórico Anual</span>
     </a>
     </li>
     @endhasanyrole

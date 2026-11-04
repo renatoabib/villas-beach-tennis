@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\StatisticsController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\ContributionController;
 use App\Http\Controllers\Admin\ExpenseController;
+use App\Http\Controllers\Admin\MembershipController;
 
 Auth::routes(['verify' => true, 'register' => false]);
 
@@ -74,6 +75,8 @@ Route::middleware(['auth'])->group(function () {
         Route::middleware('role:admin|superadmin|board')->group(function () {
             Route::resource('expenses', ExpenseController::class);
             Route::resource('cotisations', CotisationController::class);
+            Route::post('memberships/{membership}/approve', [MembershipController::class, 'approve'])->name('memberships.approve');
+            Route::resource('memberships', MembershipController::class);
             Route::resource('events', EventController::class);
             Route::resource('contributions', ContributionController::class);
             Route::get('statistics', [StatisticsController::class, 'index'])->name('statistics.index');
@@ -105,6 +108,8 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware('role:member')->group(function () {
         Route::get('/my-events', [EventController::class, 'index'])->name('membre.events.index');
         Route::get('/cotisations', [CotisationController::class, 'index'])->name('membre.cotisations.index');
+        Route::get('/minhas-mensalidades', [MembershipController::class, 'myMemberships'])->name('membre.memberships.index');
+        Route::post('/minhas-mensalidades/comprovante', [MembershipController::class, 'uploadProof'])->name('membre.memberships.proof');
     });
 
     // CMS fallback

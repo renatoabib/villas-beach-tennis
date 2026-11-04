@@ -58,6 +58,106 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
         return $this->hasMany(Cotisation::class);
     }
 
+    public function memberships()
+    {
+        return $this->hasMany(Membership::class);
+    }
+
+    /**
+     * Verifica se o sócio está adimplente com base nas regras:
+     * - Se o mês atual estiver pago -> Adimplente.
+     * - Se for entre os dias 01 e 05 e o mês atual não foi pago -> tolerância (adimplente se o anterior estava em dia).
+     * - A partir do dia 06, se o mês atual não estiver pago -> Inadimplente.
+     */
+    public function isAdimplente(): bool
+    {
+        if (!$this->is_active) {
+            return false;
+        }
+
+        $now = now();
+        $currentMonth = $now->copy()->startOfMonth()->toDateString();
+
+        // 1. Mês atual está pago?
+        $currentPaid = $this->memberships()
+            ->where('reference_month', $currentMonth)
+            ->where('status', Membership::STATUS_PAID)
+            ->exists();
+
+        if ($currentPaid) {
+            return true;
+        }
+
+        // 2. Janela entre o dia 01 e 05: tolerância se o mês anterior estava pago ou se é novo sócio
+        if ($now->day <= 5) {
+            $previousMonth = $now->copy()->subMonth()->startOfMonth()->toDateString();
+            $hasPrevious = $this->memberships()->where('reference_month', $previousMonth)->exists();
+
+            if (!$hasPrevious) {
+                return true;
+            }
+
+            return $this->memberships()
+                ->where('reference_month', $previousMonth)
+                ->where('status', Membership::STATUS_PAID)
+                ->exists();
+        }
+
+        // 3. Após o dia 05 sem pagamento do mês corrente -> Inadimplente
+        return false;
+    }
+
+    /**
+     * Retorna a situação detalhada da mensalidade
+     */
+    public function getMembershipFinancialStatus(): array
+    {
+        $now = now();
+        $currentMonth = $now->copy()->startOfMonth()->toDateString();
+
+        $currentPaid = $this->memberships()
+            ->where('reference_month', $currentMonth)
+            ->where('status', Membership::STATUS_PAID)
+            ->exists();
+
+        if ($currentPaid) {
+            // Obter até quando está pago (último mês pago antecipadamente)
+            $lastPaid = $this->memberships()
+                ->where('status', Membership::STATUS_PAID)
+                ->where('reference_month', '>=', $currentMonth)
+                ->orderByDesc('reference_month')
+                ->first();
+
+            $untilText = $lastPaid ? \Carbon\Carbon::parse($lastPaid->reference_month)->translatedFormat('F/Y') : null;
+
+            return [
+                'status' => 'adimplente',
+                'label' => 'ADIMPLENTE',
+                'badge' => 'bg-light-success text-success',
+                'message' => $untilText ? "Mensalidades em dia até {$untilText}." : "Pagamentos em dia. Obrigado!",
+                'can_play' => true,
+            ];
+        }
+
+        if ($now->day <= 5) {
+            return [
+                'status' => 'tolerancia',
+                'label' => 'AGUARDANDO PAGAMENTO',
+                'badge' => 'bg-light-warning text-warning',
+                'message' => 'Janela de pagamento aberta até o dia 05. Valor: R$ 50,00.',
+                'can_play' => true,
+            ];
+        }
+
+        return [
+            'status' => 'inadimplente',
+            'label' => 'INADIMPLENTE',
+            'badge' => 'bg-light-danger text-danger',
+            'message' => 'Mensalidade do mês em aberto após o dia 05. Uso da quadra bloqueado.',
+            'can_play' => false,
+        ];
+    }
+
     // Register MediaLibrary collections
     public function registerMediaCollections(): void
     {

@@ -129,16 +129,28 @@
         {{-- RIGHT COLUMN (Sidebar) --}}
         <div class="col-lg-4">
 
-            {{-- Membership Status Card --}}
-            <div class="card mb-4 {{ auth()->user()->is_active ? 'bg-light-success' : 'bg-light-danger' }}">
-                <div class="card-body text-center">
-                    <h5 class="mb-2">Membership Status</h5>
-                    <h3 class="{{ auth()->user()->is_active ? 'text-success' : 'text-danger' }}">
-                        {{ auth()->user()->is_active ? 'ACTIVE' : 'INACTIVE' }}
+            {{-- Status da Mensalidade --}}
+            @php
+                $financial = auth()->user()->getMembershipFinancialStatus();
+            @endphp
+            <div class="card mb-4 text-center {{ $financial['status'] === 'adimplente' ? 'bg-light-success' : ($financial['status'] === 'tolerancia' ? 'bg-light-warning' : 'bg-light-danger') }}">
+                <div class="card-body">
+                    <h5 class="mb-2">Situação da Mensalidade</h5>
+                    <h3 class="{{ $financial['status'] === 'adimplente' ? 'text-success' : ($financial['status'] === 'tolerancia' ? 'text-warning' : 'text-danger') }}">
+                        {{ $financial['label'] }}
                     </h3>
-                    <p class="text-muted mb-0">
-                        {{ auth()->user()->is_active ? 'Your payments are up to date. Thank you!' : 'Your membership is currently inactive. Please settle your dues.' }}
+                    <p class="text-muted mb-2">
+                        {{ $financial['message'] }}
                     </p>
+                    @if(!$financial['can_play'])
+                        <div class="alert alert-danger py-1 px-2 mb-0 d-inline-block small">
+                            <i class="ti ti-ban me-1"></i> Uso das quadras suspenso
+                        </div>
+                    @else
+                        <div class="alert alert-success py-1 px-2 mb-0 d-inline-block small">
+                            <i class="ti ti-check me-1"></i> Acesso às quadras liberado
+                        </div>
+                    @endif
                 </div>
             </div>
 
