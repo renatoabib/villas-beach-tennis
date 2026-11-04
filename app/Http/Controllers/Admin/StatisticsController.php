@@ -85,14 +85,16 @@ class StatisticsController extends Controller
         // Generate chart data
         $memberGrowthChartData = $this->generateMemberGrowthData();
 
-        // Cotisations
-        $cotisationsPaidMAD = \App\Models\Cotisation::where('status', 1)->sum('amount');
-        $cotisationsPendingMAD = \App\Models\Cotisation::where('status', 0)->sum('amount');
-        $cotisationsOverdueRejectedMAD = \App\Models\Cotisation::whereIn('status', [2, 3])->sum('amount');
+        // Memberships (Mensalidades) & Contributions
+        $membershipsPaidSum = \App\Models\Membership::where('status', \App\Models\Membership::STATUS_PAID)->sum('amount');
+        $membershipsPendingSum = \App\Models\Membership::where('status', \App\Models\Membership::STATUS_PENDING)->sum('amount');
+        
+        $totalContributions = \App\Models\Contribution::sum('amount');
+        $totalExpenses = \App\Models\Expense::sum('amount');
 
-        // Contributions & expenses
-        $totalInflowMAD = \App\Models\Contribution::sum('amount');
-        $totalOutflowMAD = \App\Models\Expense::sum('amount');
+        $totalInflowMAD = $membershipsPaidSum + $totalContributions;
+        $totalOutflowMAD = $totalExpenses;
+        $cashFlowDelta = $totalInflowMAD - $totalOutflowMAD;
 
         // Associations
         $associationsTotal = \App\Models\Association::where('is_validated', true)->count();
@@ -122,11 +124,14 @@ class StatisticsController extends Controller
             'totalActiveMembers' => $totalActiveMembers,
             'memberGrowthThisYear' => $memberGrowthThisYear,
             'memberGrowthChartData' => $memberGrowthChartData,
-            'cotisationsPaidMAD' => $cotisationsPaidMAD,
-            'cotisationsPendingMAD' => $cotisationsPendingMAD,
-            'cotisationsOverdueRejectedMAD' => $cotisationsOverdueRejectedMAD,
+            'membershipsPaidSum' => $membershipsPaidSum,
+            'membershipsPendingSum' => $membershipsPendingSum,
+            'cotisationsPaidMAD' => $membershipsPaidSum, // compatibilidade
+            'cotisationsPendingMAD' => $membershipsPendingSum,
+            'cotisationsOverdueRejectedMAD' => 0,
             'totalInflowMAD' => $totalInflowMAD,
             'totalOutflowMAD' => $totalOutflowMAD,
+            'cashFlowDelta' => $cashFlowDelta,
             'associationsTotal' => $associationsTotal,
             'associationsGrowthThisYear' => $associationsGrowthThisYear,
             'cotisationsByAssociation' => $cotisationsByAssociation,
@@ -186,20 +191,16 @@ class StatisticsController extends Controller
         // Member growth chart data
         $memberGrowthChartData = $this->generateAdminMemberGrowthData($associationId);
 
-        // Cotisations sums
-        $cotisationsPaidMAD = \App\Models\Cotisation::where('association_id', $associationId)
-            ->where('status', 1)
+        // Memberships sums for this association
+        $membershipsPaidSum = \App\Models\Membership::where('association_id', $associationId)
+            ->where('status', \App\Models\Membership::STATUS_PAID)
             ->sum('amount');
 
-        $cotisationsPendingMAD = \App\Models\Cotisation::where('association_id', $associationId)
-            ->where('status', 0)
+        $membershipsPendingSum = \App\Models\Membership::where('association_id', $associationId)
+            ->where('status', \App\Models\Membership::STATUS_PENDING)
             ->sum('amount');
 
-        $cotisationsOverdueRejectedMAD = \App\Models\Cotisation::where('association_id', $associationId)
-            ->whereIn('status', [2, 3])
-            ->sum('amount');
-
-        // Cotisation cashflow last 6 months
+        // Cashflow last 6 months from Memberships
         $months = 6;
         $cashflowLabels = [];
         $cashflowValues = [];
@@ -208,14 +209,18 @@ class StatisticsController extends Controller
             $monthStart = now()->startOfMonth()->subMonths($i);
             $monthEnd = $monthStart->copy()->endOfMonth();
 
-            $sum = \App\Models\Cotisation::where('association_id', $associationId)
-                ->where('status', 1)
+            $sum = \App\Models\Membership::where('association_id', $associationId)
+                ->where('status', \App\Models\Membership::STATUS_PAID)
                 ->whereBetween('paid_at', [$monthStart, $monthEnd])
                 ->sum('amount');
 
             $cashflowLabels[] = $monthStart->format('M Y');
             $cashflowValues[] = $sum;
         }
+
+        $totalInflow = $membershipsPaidSum + \App\Models\Contribution::where('association_id', $associationId)->sum('amount');
+        $totalOutflow = \App\Models\Expense::where('association_id', $associationId)->sum('amount');
+        $cashFlowDelta = $totalInflow - $totalOutflow;
 
         // Monthly expenses (last 6 months)
         $totalOutflowMAD = \App\Models\Expense::where('association_id', $associationId)

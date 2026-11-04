@@ -36,6 +36,12 @@
                         <div class="row">
 
                             <div class="mb-3 col-md-6">
+                                <label for="member_number" class="form-label">Número do Sócio (ID Público)</label>
+                                <input type="text" class="form-control bg-light" value="{{ $user->member_number }}" disabled>
+                                <small class="text-muted">Gerado automaticamente pelo sistema.</small>
+                            </div>
+
+                            <div class="mb-3 col-md-6">
                                 <label for="name" class="form-label">Full Name</label>
                                 <input type="text" name="name"
                                     class="form-control @error('name') is-invalid @enderror"

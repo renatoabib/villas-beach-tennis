@@ -45,6 +45,7 @@
                     <div class="d-flex mb-3">
                         <div class="flex-grow-1 ms-2 text-center">
                             <h5 class="mb-1">{{ $user->name }}</h5>
+                            <p class="text-primary font-monospace fw-bold mb-1">{{ $user->member_number ?? 'Sem Número' }}</p>
                             <p class="text-muted text-sm mb-0">{{ $user->email }}</p>
                             <p class="text-muted text-sm mb-0">📞 {{ $user->phone ?? '-' }}</p>
                             <p class="text-muted text-sm mb-0">
