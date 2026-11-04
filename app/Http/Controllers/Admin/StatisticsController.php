@@ -85,14 +85,18 @@ class StatisticsController extends Controller
         // Generate chart data
         $memberGrowthChartData = $this->generateMemberGrowthData();
 
-        // Memberships (Mensalidades) & Contributions
+        // Memberships, Cotisations (aportes extras), & Contributions (diárias não-sócios)
         $membershipsPaidSum = \App\Models\Membership::where('status', \App\Models\Membership::STATUS_PAID)->sum('amount');
         $membershipsPendingSum = \App\Models\Membership::where('status', \App\Models\Membership::STATUS_PENDING)->sum('amount');
         
+        $cotisationsPaidMAD = \App\Models\Cotisation::where('status', 1)->sum('amount');
+        $cotisationsPendingMAD = \App\Models\Cotisation::where('status', 0)->sum('amount');
+        $cotisationsOverdueRejectedMAD = \App\Models\Cotisation::whereIn('status', [2, 3])->sum('amount');
+
         $totalContributions = \App\Models\Contribution::sum('amount');
         $totalExpenses = \App\Models\Expense::sum('amount');
 
-        $totalInflowMAD = $membershipsPaidSum + $totalContributions;
+        $totalInflowMAD = $membershipsPaidSum + $cotisationsPaidMAD + $totalContributions;
         $totalOutflowMAD = $totalExpenses;
         $cashFlowDelta = $totalInflowMAD - $totalOutflowMAD;
 
@@ -126,9 +130,9 @@ class StatisticsController extends Controller
             'memberGrowthChartData' => $memberGrowthChartData,
             'membershipsPaidSum' => $membershipsPaidSum,
             'membershipsPendingSum' => $membershipsPendingSum,
-            'cotisationsPaidMAD' => $membershipsPaidSum, // compatibilidade
-            'cotisationsPendingMAD' => $membershipsPendingSum,
-            'cotisationsOverdueRejectedMAD' => 0,
+            'cotisationsPaidMAD' => $cotisationsPaidMAD,
+            'cotisationsPendingMAD' => $cotisationsPendingMAD,
+            'cotisationsOverdueRejectedMAD' => $cotisationsOverdueRejectedMAD,
             'totalInflowMAD' => $totalInflowMAD,
             'totalOutflowMAD' => $totalOutflowMAD,
             'cashFlowDelta' => $cashFlowDelta,
@@ -191,35 +195,19 @@ class StatisticsController extends Controller
         // Member growth chart data
         $memberGrowthChartData = $this->generateAdminMemberGrowthData($associationId);
 
-        // Memberships sums for this association
+        // Memberships & Cotisations sums for this association
         $membershipsPaidSum = \App\Models\Membership::where('association_id', $associationId)
             ->where('status', \App\Models\Membership::STATUS_PAID)
             ->sum('amount');
 
-        $membershipsPendingSum = \App\Models\Membership::where('association_id', $associationId)
-            ->where('status', \App\Models\Membership::STATUS_PENDING)
+        $cotisationsPaidMAD = \App\Models\Cotisation::where('association_id', $associationId)
+            ->where('status', 1)
             ->sum('amount');
 
-        // Cashflow last 6 months from Memberships
-        $months = 6;
-        $cashflowLabels = [];
-        $cashflowValues = [];
-
-        for ($i = $months - 1; $i >= 0; $i--) {
-            $monthStart = now()->startOfMonth()->subMonths($i);
-            $monthEnd = $monthStart->copy()->endOfMonth();
-
-            $sum = \App\Models\Membership::where('association_id', $associationId)
-                ->where('status', \App\Models\Membership::STATUS_PAID)
-                ->whereBetween('paid_at', [$monthStart, $monthEnd])
-                ->sum('amount');
-
-            $cashflowLabels[] = $monthStart->format('M Y');
-            $cashflowValues[] = $sum;
-        }
-
-        $totalInflow = $membershipsPaidSum + \App\Models\Contribution::where('association_id', $associationId)->sum('amount');
+        $totalContributions = \App\Models\Contribution::where('association_id', $associationId)->sum('amount');
         $totalOutflow = \App\Models\Expense::where('association_id', $associationId)->sum('amount');
+        
+        $totalInflow = $membershipsPaidSum + $cotisationsPaidMAD + $totalContributions;
         $cashFlowDelta = $totalInflow - $totalOutflow;
 
         // Monthly expenses (last 6 months)
