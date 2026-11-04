@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
     <title>@yield('title') | Villas Beach Tennis</title>
@@ -11,7 +11,7 @@
         content="Villas Beach Tennis is trending dashboard template made using Laravel 11 &  Bootstrap 5 design framework. Villas Beach Tennis is available in Bootstrap, React, CodeIgniter, Angular,  and .net Technologies.">
     <meta name="keywords"
         content="Laravel 11 Bootstrap admin template, Dashboard UI Kit, Dashboard Template, Backend Panel, react dashboard, angular dashboard">
-    <meta name="author" content="phoenixcoded">
+    <meta name="author" content="Villas Beach Tennis">
 
     <!-- [Favicon] icon -->
     <link rel="icon" href="{{ URL::asset('build/images/favicon.svg') }}" type="image/x-icon">

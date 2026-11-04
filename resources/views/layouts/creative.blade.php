@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
     <meta charset="UTF-8">
@@ -9,7 +9,7 @@
   name="description"
   content="Villas Beach Tennis admin and dashboard template offer a variety of UI elements and pages, ensuring your admin panel is both fast and effective."
 />
-<meta name="author" content="phoenixcoded" />
+<meta name="author" content="Villas Beach Tennis" />
 
     <!-- Site Tiltle -->
     <title>@yield('title', 'Villas Beach Tennis')</title>

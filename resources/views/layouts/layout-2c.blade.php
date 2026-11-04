@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
   <!-- [Head] start -->
 
   <head>
@@ -12,7 +12,7 @@
   name="description"
   content="Villas Beach Tennis admin and dashboard template offer a variety of UI elements and pages, ensuring your admin panel is both fast and effective."
 />
-<meta name="author" content="phoenixcoded" />
+<meta name="author" content="Villas Beach Tennis" />
 <link rel="icon" href="{{ URL::asset('build/images/favicon.svg') }}" type="image/x-icon">
 @yield('css')
 @include('layouts.head-css')

@@ -3,19 +3,18 @@
     <div class="container title mb-0">
         <div class="row align-items-center">
             <div class="col-md-8">
-                <h2 class="mb-3">Be the first to know</h2>
+                <h2 class="mb-3">Fique por dentro</h2>
                 <p class="mb-4 mb-md-0">
-                    Simply submit your email, we share you the top news related to
-                    Able Pro feature updates, roadmap, and news.
+                    Cadastre seu e-mail para receber novidades, eventos e comunicados do clube.
                 </p>
             </div>
             <div class="col-md-4">
                 <div class="row">
                     <div class="col">
-                        <input type="email" class="form-control" placeholder="Enter your email" />
+                        <input type="email" class="form-control" placeholder="Seu e-mail" />
                     </div>
                     <div class="col-auto">
-                        <button class="btn btn-primary">Subscribe</button>
+                        <button class="btn btn-primary">Inscrever</button>
                     </div>
                 </div>
             </div>
@@ -27,9 +26,8 @@
                 <div class="col-md-4">
                     <img src="{{ asset('assets/images/logo/villas.jpg') }}" alt="image"
                         class="footer-logo img-fluid mb-3" />
-                    <p class="mb-4">Since 2014, over 6.3K developers have placed their trust in Rochdi & Halima's
-                        Templates. Villas Beach Tennis is managed by their
-                        experienced team of professionals.</p>
+                    <p class="mb-4">Villas Beach Tennis &mdash; clube de beach tennis com estrutura
+                        completa para sócios e atletas.</p>
                 </div>
                 <div class="col-md-8">
                     <div class="row">
@@ -69,12 +67,12 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col my-1">
-                    <p class="m-0">Made with &#9829; by Team <a href="https://www.linkedin.com/" target="_blank"> Rochdi & Halima</a></p>
+                    <p class="m-0">&copy; {{ date('Y') }} Villas Beach Tennis</p>
                 </div>
                 <div class="col-auto my-1">
                     <ul class="list-inline footer-sos-link mb-0">
                         <li class="list-inline-item">
-                            <a href="https://fb.com/phoenixcoded"><i class="ph-duotone ph-facebook-logo f-20"></i></a>
+                            <a href="#"><i class="ph-duotone ph-facebook-logo f-20"></i></a>
                         </li>
                     </ul>
                 </div>

@@ -2,13 +2,12 @@
   <div class="footer-wrapper container-fluid">
     <div class="row">
       <div class="col-sm-6 my-1">
-        <p class="m-0">Made with &#9829; by Team <a href="https://www.linkedin.com/" target="_blank"> Rochdi &
-            Halima</a></p>
+        <p class="m-0">&copy; {{ date('Y') }} Villas Beach Tennis</p>
       </div>
       <div class="col-auto my-1">
         <ul class="list-inline footer-link mb-0">
-          <li class="list-inline-item"><a href="{{ route('home') }}">Home</a></li>
-          <li class="list-inline-item"><a href="{{ route('user-guide') }}">User Guide</a></li>
+          <li class="list-inline-item"><a href="{{ route('home') }}">Início</a></li>
+          <li class="list-inline-item"><a href="{{ route('user-guide') }}">Guia do Usuário</a></li>
         </ul>
       </div>
 
