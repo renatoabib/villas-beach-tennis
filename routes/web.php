@@ -76,6 +76,7 @@ Route::middleware(['auth'])->group(function () {
             Route::resource('expenses', ExpenseController::class);
             Route::resource('cotisations', CotisationController::class);
             Route::post('memberships/{membership}/approve', [MembershipController::class, 'approve'])->name('memberships.approve');
+            Route::post('memberships/generate-pending', [MembershipController::class, 'generatePending'])->name('memberships.generate-pending');
             Route::resource('memberships', MembershipController::class);
             Route::resource('events', EventController::class);
             Route::resource('contributions', ContributionController::class);

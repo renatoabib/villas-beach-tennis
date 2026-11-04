@@ -126,7 +126,7 @@
                                         </td>
                                         <td>
                                             @if($m->payment_proof)
-                                                <a href="{{ asset('storage/' . $m->payment_proof') }}" target="_blank" class="btn btn-sm btn-outline-info py-0 px-2">
+                                                <a href="{{ asset('storage/' . $m->payment_proof) }}" target="_blank" class="btn btn-sm btn-outline-info py-0 px-2">
                                                     <i class="ti ti-file-text"></i> Ver Anexo
                                                 </a>
                                             @else

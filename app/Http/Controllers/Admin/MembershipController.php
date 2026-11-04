@@ -231,27 +231,41 @@ class MembershipController extends Controller
     }
 
     /**
-     * Aprovação rápida em 1 clique
+     * Gera pendências para todos os usuários ativos que não possuem registro no mês atual
      */
-    public function approve(Membership $membership)
+    public function generatePending(Request $request)
     {
         $authUser = auth()->user();
-
-        if (!$authUser->hasRole('superadmin') && (int)$membership->association_id !== (int)$authUser->association_id) {
+        if (!$authUser->hasAnyRole(['admin', 'superadmin'])) {
             abort(403);
         }
 
-        $ref = Carbon::parse($membership->reference_month);
+        $currentMonth = now()->startOfMonth()->toDateString();
+        $users = User::where('is_active', true)->get();
+        $count = 0;
 
-        $membership->update([
-            'status' => Membership::STATUS_PAID,
-            'paid_at' => now(),
-            'approved_by' => $authUser->id,
-            'approved_at' => now(),
-            'receipt_number' => $membership->receipt_number ?? ('VBT-' . $ref->format('Ym') . '-' . str_pad($membership->user_id, 4, '0', STR_PAD_LEFT)),
-        ]);
+        foreach ($users as $user) {
+            $exists = Membership::where('user_id', $user->id)
+                ->where('reference_month', $currentMonth)
+                ->exists();
 
-        return back()->with('toast', 'Mensalidade aprovada como PAGA!');
+            if (!$exists) {
+                Membership::create([
+                    'user_id' => $user->id,
+                    'association_id' => $user->association_id,
+                    'reference_month' => $currentMonth,
+                    'due_date' => now()->day(5)->toDateString(),
+                    'amount' => 50.00,
+                    'status' => Membership::STATUS_PENDING,
+                    'payment_method' => 'pix',
+                    'notes' => 'Gerado automaticamente pelo sistema.',
+                ]);
+                $count++;
+            }
+        }
+
+        return redirect()->route('admin.memberships.index')
+            ->with('toast', "{$count} pendências geradas com sucesso para o mês atual.");
     }
 
     /**

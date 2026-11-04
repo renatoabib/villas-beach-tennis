@@ -80,9 +80,15 @@
             <div class="card table-card">
                 <div class="card-header d-sm-flex align-items-center justify-content-between">
                     <h5 class="mb-3 mb-sm-0">Histórico de Mensalidades</h5>
-                    <div>
+                    <div class="d-flex gap-2">
+                        <form action="{{ route('admin.memberships.generate-pending') }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn btn-outline-primary" title="Gerar pendências para usuários ativos">
+                                <i class="ti ti-refresh me-1"></i> Gerar Pendências
+                            </button>
+                        </form>
                         <a href="{{ route('admin.memberships.create') }}" class="btn btn-primary">
-                            <i class="ti ti-plus me-1"></i> Lançar Pagamento / Mensalidade
+                            <i class="ti ti-plus me-1"></i> Lançar Pagamento
                         </a>
                     </div>
                 </div>
@@ -167,7 +173,7 @@
                                         </td>
                                         <td>
                                             @if($m->payment_proof)
-                                                <a href="{{ asset('storage/' . $m->payment_proof') }}" target="_blank" class="btn btn-sm btn-outline-info py-0 px-2" title="Visualizar Comprovante">
+                                                <a href="{{ asset('storage/' . $m->payment_proof) }}" target="_blank" class="btn btn-sm btn-outline-info py-0 px-2" title="Visualizar Comprovante">
                                                     <i class="ti ti-file-text"></i> Ver Anexo
                                                 </a>
                                             @else

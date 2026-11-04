@@ -75,7 +75,7 @@
                                 accept="image/*,.pdf">
                             @if($membership->payment_proof)
                                 <small class="d-block mt-1">
-                                    <a href="{{ asset('storage/' . $membership->payment_proof') }}" target="_blank" class="text-info">
+                                    <a href="{{ asset('storage/' . $membership->payment_proof) }}" target="_blank" class="text-info">
                                         <i class="ti ti-file-text"></i> Ver comprovante atual anexado
                                     </a>
                                 </small>
