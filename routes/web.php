@@ -114,6 +114,9 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/minhas-mensalidades/comprovante', [MembershipController::class, 'uploadProof'])->name('membre.memberships.proof');
     });
 
+    // Rota pública de check (QR Code)
+    Route::get('/check/{memberNumber}', [CheckController::class, 'show'])->name('check.status');
+
     // CMS fallback
     Route::get('{routeName}/{name?}', [HomeController::class, 'pageView']);
 });
@@ -121,8 +124,6 @@ Route::middleware(['auth'])->group(function () {
 Route::get('/test-error', function () {
     abort(500);
 });
-
-Route::get('/check/{memberNumber}', [CheckController::class, 'show'])->name('check.status');
 
 // === Fallback for 404 Not Found ===
 Route::fallback(function () {
