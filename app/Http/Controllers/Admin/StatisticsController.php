@@ -100,8 +100,29 @@ class StatisticsController extends Controller
         $totalOutflowMAD = $totalExpenses;
         $cashFlowDelta = $totalInflowMAD - $totalOutflowMAD;
 
-        // Associations
-        $associationsTotal = \App\Models\Association::where('is_validated', true)->count();
+        // Combined Cashflow last 6 months (Memberships + Cotisations + Contributions)
+        $months = 6;
+        $cashflowLabels = [];
+        $cashflowValues = [];
+
+        for ($i = $months - 1; $i >= 0; $i--) {
+            $monthStart = now()->startOfMonth()->subMonths($i);
+            $monthEnd = $monthStart->copy()->endOfMonth();
+
+            $sumMembership = \App\Models\Membership::where('status', \App\Models\Membership::STATUS_PAID)
+                ->whereBetween('paid_at', [$monthStart, $monthEnd])
+                ->sum('amount');
+
+            $sumCotisation = \App\Models\Cotisation::where('status', 1)
+                ->whereBetween('paid_at', [$monthStart, $monthEnd])
+                ->sum('amount');
+
+            $sumContribution = \App\Models\Contribution::whereBetween('created_at', [$monthStart, $monthEnd])
+                ->sum('amount');
+
+            $cashflowLabels[] = $monthStart->format('M Y');
+            $cashflowValues[] = $sumMembership + $sumCotisation + $sumContribution;
+        }
         $associationsGrowthThisYear = \App\Models\Association::where('is_validated', true)
             ->whereYear('validation_date', now()->year)
             ->count();
@@ -133,6 +154,8 @@ class StatisticsController extends Controller
             'cotisationsPaidMAD' => $cotisationsPaidMAD,
             'cotisationsPendingMAD' => $cotisationsPendingMAD,
             'cotisationsOverdueRejectedMAD' => $cotisationsOverdueRejectedMAD,
+            'cashflowLabels' => $cashflowLabels,
+            'cashflowValues' => collect($cashflowValues),
             'totalInflowMAD' => $totalInflowMAD,
             'totalOutflowMAD' => $totalOutflowMAD,
             'cashFlowDelta' => $cashFlowDelta,

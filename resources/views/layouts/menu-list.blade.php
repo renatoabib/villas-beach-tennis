@@ -5,7 +5,7 @@
     <li class="pc-item">
     <a href="{{ route('dashboard') }}" class="pc-link">
       <span class="pc-micon"><i class="ph-duotone ph-gauge"></i></span>
-      <span class="pc-mtext" data-i18n="Dashboard">Dashboard</span>
+      <span class="pc-mtext">Painel</span>
     </a>
     </li>
   @endcan
@@ -15,7 +15,7 @@
     <li class="pc-item">
     <a href="{{ route('statistics') }}" class="pc-link">
       <span class="pc-micon"><i class="ph-duotone ph-chart-bar"></i></span>
-      <span class="pc-mtext" data-i18n="Statistics">Statistics</span>
+      <span class="pc-mtext">Estatísticas</span>
     </a>
     </li>
   @endcan
@@ -26,7 +26,7 @@
     <li class="pc-item">
     <a href="{{ route('admin.roles.index') }}" class="pc-link">
       <span class="pc-micon"><i class="ph-duotone ph-shield-star"></i></span>
-      <span class="pc-mtext" data-i18n="Roles">Manage Roles</span>
+      <span class="pc-mtext">Cargos</span>
     </a>
     </li>
   @endcan
@@ -36,7 +36,7 @@
     <li class="pc-item">
     <a href="{{ route('admin.permissions.index') }}" class="pc-link">
       <span class="pc-micon"><i class="ph-duotone ph-keyhole"></i></span>
-      <span class="pc-mtext" data-i18n="Permissions">Manage Permissions</span>
+      <span class="pc-mtext">Permissões</span>
     </a>
     </li>
   @endcan
@@ -46,45 +46,43 @@
     <li class="pc-item">
     <a href="{{ route('admin.associations.index') }}" class="pc-link">
       <span class="pc-micon"><i class="ph-duotone ph-users-three"></i></span>
-      <span class="pc-mtext" data-i18n="Associations">Manage Associations</span>
+      <span class="pc-mtext">Clubes</span>
     </a>
     </li>
   @endcan
 
-  {{-- Membres (Admin, Board, Supervisor have 'view members') --}}
+  {{-- Membres --}}
   @can('view members')
     <li class="pc-item">
     <a href="{{ route('admin.membres.index') }}" class="pc-link">
       <span class="pc-micon"><i class="ph-duotone ph-user-circle"></i></span>
-      <span class="pc-mtext" data-i18n="Membres">Manage Membres</span>
+      <span class="pc-mtext">Sócios</span>
     </a>
     </li>
   @endcan
 
-  {{-- Meetings (Admin, Board, Supervisor, Member have 'view meetings') --}}
+  {{-- Meetings --}}
   @can('view meetings')
     <li class="pc-item">
     <a href="{{ route('admin.meetings.index') }}" class="pc-link">
       <span class="pc-micon"><i class="ph-duotone ph-calendar-blank"></i></span>
-      <span class="pc-mtext" data-i18n="Meetings">Manage Meetings</span>
+      <span class="pc-mtext">Reuniões</span>
     </a>
     </li>
   @endcan
 
-  {{-- Events (All roles that need access have 'view events') --}}
+  {{-- Events --}}
   @can('view events')
     <li class="pc-item">
     <a href="{{ auth()->user()->hasRole('member') ? route('membre.events.index') : route('admin.events.index') }}"
       class="pc-link">
       <span class="pc-micon"><i class="ph-duotone ph-calendar-check"></i></span>
-      <span class="pc-mtext">
-      @role('member') Events @else Manage Events @endrole
-      </span>
+      <span class="pc-mtext">Eventos</span>
     </a>
     </li>
   @endcan
 
-  {{-- Mensalidades (Villas Beach Tennis) --}}
+  {{-- Mensalidades --}}
   @role('member')
     <li class="pc-item">
     <a href="{{ route('membre.memberships.index') }}" class="pc-link">
@@ -103,13 +101,13 @@
     </li>
   @endhasanyrole
 
-  {{-- Cotisations (Aportes Extras) --}}
+  {{-- Aportes --}}
   @can('view cotisations')
     @role('member')
     <li class="pc-item">
     <a href="{{ route('membre.cotisations.index') }}" class="pc-link">
       <span class="pc-micon"><i class="ph-duotone ph-receipt"></i></span>
-      <span class="pc-mtext">Aportes Extras</span>
+      <span class="pc-mtext">Aportes</span>
     </a>
     </li>
     @endrole
@@ -118,29 +116,29 @@
     <li class="pc-item">
     <a href="{{ route('admin.cotisations.index') }}" class="pc-link">
       <span class="pc-micon"><i class="ph-duotone ph-receipt"></i></span>
-      <span class="pc-mtext">Aportes Extras (Cotizações)</span>
+      <span class="pc-mtext">Aportes</span>
     </a>
     </li>
     @endhasanyrole
   @endcan
 
 
-  {{-- Contributions (Diárias Não-sócios) --}}
+  {{-- Diárias --}}
   @can('view contributions')
     <li class="pc-item">
     <a href="{{ route('admin.contributions.index') }}" class="pc-link">
       <span class="pc-micon"><i class="ph-duotone ph-hand-heart"></i></span>
-      <span class="pc-mtext">Diárias (Não-sócios)</span>
+      <span class="pc-mtext">Diárias</span>
     </a>
     </li>
   @endcan
 
-  {{-- Expenses (Admin, Superadmin, Board have 'view expenses') --}}
+  {{-- Despesas --}}
   @can('view expenses')
     <li class="pc-item">
     <a href="{{ route('admin.expenses.index') }}" class="pc-link">
       <span class="pc-micon"><i class="ph-duotone ph-currency-circle-dollar"></i></span>
-      <span class="pc-mtext" data-i18n="Expenses">Manage Expenses</span>
+      <span class="pc-mtext">Despesas</span>
     </a>
     </li>
   @endcan
