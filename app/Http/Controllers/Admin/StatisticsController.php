@@ -210,7 +210,32 @@ class StatisticsController extends Controller
         $totalInflow = $membershipsPaidSum + $cotisationsPaidMAD + $totalContributions;
         $cashFlowDelta = $totalInflow - $totalOutflow;
 
-        // Monthly expenses (last 6 months)
+        // Combined Cashflow last 6 months (Memberships + Cotisations + Contributions)
+        $months = 6;
+        $cashflowLabels = [];
+        $cashflowValues = [];
+
+        for ($i = $months - 1; $i >= 0; $i--) {
+            $monthStart = now()->startOfMonth()->subMonths($i);
+            $monthEnd = $monthStart->copy()->endOfMonth();
+
+            $sumMembership = \App\Models\Membership::where('association_id', $associationId)
+                ->where('status', \App\Models\Membership::STATUS_PAID)
+                ->whereBetween('paid_at', [$monthStart, $monthEnd])
+                ->sum('amount');
+
+            $sumCotisation = \App\Models\Cotisation::where('association_id', $associationId)
+                ->where('status', 1)
+                ->whereBetween('paid_at', [$monthStart, $monthEnd])
+                ->sum('amount');
+
+            $sumContribution = \App\Models\Contribution::where('association_id', $associationId)
+                ->whereBetween('created_at', [$monthStart, $monthEnd])
+                ->sum('amount');
+
+            $cashflowLabels[] = $monthStart->format('M Y');
+            $cashflowValues[] = $sumMembership + $sumCotisation + $sumContribution;
+        }
         $totalOutflowMAD = \App\Models\Expense::where('association_id', $associationId)
             ->whereBetween('spent_at', [
                 now()->subMonths(6)->startOfMonth(),

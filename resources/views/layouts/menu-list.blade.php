@@ -103,13 +103,13 @@
     </li>
   @endhasanyrole
 
-  {{-- Cotisations (Legado/Anual) --}}
+  {{-- Cotisations (Aportes Extras) --}}
   @can('view cotisations')
     @role('member')
     <li class="pc-item">
     <a href="{{ route('membre.cotisations.index') }}" class="pc-link">
       <span class="pc-micon"><i class="ph-duotone ph-receipt"></i></span>
-      <span class="pc-mtext" data-i18n="My Cotisations">Histórico Anual</span>
+      <span class="pc-mtext">Aportes Extras</span>
     </a>
     </li>
     @endrole
@@ -118,19 +118,19 @@
     <li class="pc-item">
     <a href="{{ route('admin.cotisations.index') }}" class="pc-link">
       <span class="pc-micon"><i class="ph-duotone ph-receipt"></i></span>
-      <span class="pc-mtext" data-i18n="Cotisations">Histórico Anual</span>
+      <span class="pc-mtext">Aportes Extras (Cotizações)</span>
     </a>
     </li>
     @endhasanyrole
   @endcan
 
 
-  {{-- Contributions (Admin, Superadmin, Board have 'view contributions') --}}
+  {{-- Contributions (Diárias Não-sócios) --}}
   @can('view contributions')
     <li class="pc-item">
     <a href="{{ route('admin.contributions.index') }}" class="pc-link">
       <span class="pc-micon"><i class="ph-duotone ph-hand-heart"></i></span>
-      <span class="pc-mtext" data-i18n="Contributions">Manage Contributions</span>
+      <span class="pc-mtext">Diárias (Não-sócios)</span>
     </a>
     </li>
   @endcan
