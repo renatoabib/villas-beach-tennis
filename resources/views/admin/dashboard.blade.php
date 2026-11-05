@@ -10,13 +10,6 @@
 
 @section('content')
 
-    @if (!auth()->user()->hasVerifiedEmail())
-        <div class="alert alert-warning">
-            Your email is not verified yet. Please verify your email.
-        </div>
-    @endif
-
-
     <div class="row">
 
         {{-- Top Statistics Row --}}

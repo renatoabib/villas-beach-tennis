@@ -9,12 +9,6 @@
 
 @section('content')
 
-    {{-- Notifications --}}
-    <div class="alert alert-warning" role="alert">
-        <i class="ti ti-alert-triangle me-2"></i>
-        Your email is not verified yet. Please check your inbox for a verification link.
-    </div>
-
     @if ($overdueTotal > 0 || $pendingTotal > 0)
         <div class="alert alert-danger" role="alert">
             <i class="ti ti-file-invoice me-2"></i>

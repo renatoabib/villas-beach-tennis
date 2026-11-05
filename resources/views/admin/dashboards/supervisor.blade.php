@@ -9,14 +9,6 @@
 
 @section('content')
 
-    {{-- Dynamic Email verification alert --}}
-    @if (!auth()->user()->hasVerifiedEmail())
-        <div class="alert alert-warning" role="alert">
-            <i class="ti ti-alert-triangle me-2"></i>
-            Your email is not verified yet. Please check your inbox for a verification link.
-        </div>
-    @endif
-
     {{-- Dynamic unpaid cotisation alert --}}
     @php
         $overdueAmount = $myCotisations[\App\Models\Cotisation::STATUS_OVERDUE] ?? 0;
