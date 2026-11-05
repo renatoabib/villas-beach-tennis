@@ -68,6 +68,26 @@
                             ← Back to List
                         </a>
                     </div>
+
+                    <!-- QR Code for Racquet -->
+                    <div class="saprator my-3"><span>QR Code – Raquete</span></div>
+                    <div class="text-center">
+                        @php
+                            $checkUrl = route('check.status', $user->member_number, absolute: true);
+                            $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' . urlencode($checkUrl);
+                        @endphp
+                        <img src="{{ $qrUrl }}"
+                            alt="QR Code {{ $user->member_number }}"
+                            class="img-fluid rounded border"
+                            style="max-width: 260px; max-height: 260px;" />
+                        <p class="mt-2 text-muted text-sm">
+                            <strong>{{ $user->member_number }}</strong><br>
+                            Escaneie para verificar adimplência
+                        </p>
+                        <button class="btn btn-outline-primary btn-sm mt-2" onclick="window.print()">
+                            <i data-feather="printer"></i> Imprimir Etiqueta
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
