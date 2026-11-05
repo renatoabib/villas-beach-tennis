@@ -14,4 +14,9 @@ class CheckController extends Controller
 
         return view('check.status', compact('user', 'financial'));
     }
+
+    public function scanner()
+    {
+        return view('admin.qr-scanner');
+    }
 }

@@ -10,6 +10,16 @@
     </li>
   @endcan
 
+  {{-- QR Scanner --}}
+  @hasanyrole('admin|superadmin|board')
+    <li class="pc-item">
+    <a href="{{ route('admin.qr-scanner') }}" class="pc-link">
+      <span class="pc-micon"><i class="ph-duotone ph-qrcode"></i></span>
+      <span class="pc-mtext">Escanear Sócio</span>
+    </a>
+    </li>
+  @endhasanyrole
+
   {{-- Statistics --}}
   @can('view statistics')
     <li class="pc-item">

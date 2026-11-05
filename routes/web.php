@@ -82,6 +82,7 @@ Route::middleware(['auth'])->group(function () {
             Route::resource('events', EventController::class);
             Route::resource('contributions', ContributionController::class);
             Route::get('statistics', [StatisticsController::class, 'index'])->name('statistics.index');
+            Route::get('qr-scanner', [CheckController::class, 'scanner'])->name('qr-scanner');
         });
 
         // ✅ Management routes for higher roles only
