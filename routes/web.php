@@ -117,6 +117,7 @@ Route::middleware(['auth'])->group(function () {
 
     // Rota pública de check (QR Code)
     Route::get('/check/{memberNumber}', [CheckController::class, 'show'])->name('check.status');
+    Route::get('/check/{memberNumber}/qrcode', [CheckController::class, 'qrcodeImage'])->name('check.qrcode');
 
     // CMS fallback
     Route::get('{routeName}/{name?}', [HomeController::class, 'pageView']);

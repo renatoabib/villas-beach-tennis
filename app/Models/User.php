@@ -212,14 +212,14 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
     }
 
     /**
-     * Retorna a URL pública do QR Code salvo, ou null se não existir.
+     * Retorna a URL pública do QR Code salvo, servida via PHP (evita problema com nginx/symlink).
      */
     public function qrCodeUrl(): ?string
     {
         $path = "qrcodes/{$this->member_number}.svg";
 
         if (Storage::disk('public')->exists($path)) {
-            return Storage::disk('public')->url($path);
+            return route('check.qrcode', $this->member_number);
         }
 
         return null;
