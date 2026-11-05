@@ -91,7 +91,7 @@
 
     </div>
 
-    {{-- Row 2: Cashflow chart + Composition --}}
+    {{-- Row 2: Cashflow chart + Composition + QR Scanner --}}
     <div class="row g-3 mt-1">
         <div class="col-lg-8">
             <div class="card">
@@ -142,6 +142,20 @@
                     </ul>
                 </div>
             </div>
+
+            <div class="card mt-3 h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="ti ti-qrcode me-1"></i>Escanear Sócio</h5>
+                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#qrScanModal">
+                        <i class="ti ti-camera me-1"></i> Abrir Câmera
+                    </button>
+                </div>
+                <div class="card-body text-center py-4">
+                    <p class="text-muted text-sm mb-0">
+                        Aponte a câmera para o QR Code colado na raquete do sócio
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -190,6 +204,31 @@
                             </tbody>
                         </table>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Modal Scanner QR Code --}}
+    <div class="modal fade" id="qrScanModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="ti ti-camera me-1"></i>Escanear QR Code</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body text-center p-0">
+                    <div id="qr-reader" style="width: 100%; max-width: 400px; margin: 0 auto;"></div>
+                    <div class="mt-3">
+                        <p class="text-muted text-sm">Ou digite o número do sócio:</p>
+                        <input type="text" id="qrManualInput" class="form-control form-control-sm w-75 mx-auto" placeholder="VBT-2026-0003">
+                        <button class="btn btn-sm btn-outline-primary mt-2" onclick="checkManual()">
+                            Verificar
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fechar</button>
                 </div>
             </div>
         </div>
@@ -273,6 +312,59 @@
                     categories: cashflowData[range].categories
                 }
             });
+        });
+
+        // Scanner QR Code (html5-qrcode via CDN)
+        const qrScript = document.createElement('script');
+        qrScript.src = 'https://unpkg.com/html5-qrcode';
+        qrScript.onload = () => {
+            let html5QrcodeScanner = null;
+
+            const qrReader = document.getElementById('qr-reader');
+            const modal = document.getElementById('qrScanModal');
+
+            modal.addEventListener('show.bs.modal', () => {
+                qrReader.innerHTML = '';
+                html5QrcodeScanner = new Html5QrcodeScanner('qr-reader', {
+                    fps: 10,
+                    qrbox: 250
+                }, false);
+
+                html5QrcodeScanner.render(
+                    (decodedText) => {
+                        const match = decodedText.match(/\/check\/([A-Z0-9-]+)$/) || decodedText.match(/([A-Z0-9]{3}-\d{4}-\d{4})$/);
+                        if (match) {
+                            const memberNumber = match[1];
+                            html5QrcodeScanner.clear();
+                            window.location.href = `/check/${memberNumber}`;
+                        } else {
+                            alert('QR Code não reconhecido. Tente novamente.');
+                        }
+                    },
+                    (errorMessage) => {
+                        // ignore scan errors
+                    }
+                );
+            });
+
+            modal.addEventListener('hide.bs.modal', () => {
+                if (html5QrcodeScanner) {
+                    html5QrcodeScanner.clear();
+                    html5QrcodeScanner = null;
+                }
+            });
+        };
+        document.head.appendChild(qrScript);
+
+        function checkManual() {
+            const input = document.getElementById('qrManualInput');
+            const val = input.value.trim();
+            if (val) {
+                window.location.href = `/check/${val}`;
+            }
+        }
+        document.getElementById('qrManualInput')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') checkManual();
         });
     </script>
 
