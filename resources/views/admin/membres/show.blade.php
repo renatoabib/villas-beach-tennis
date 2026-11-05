@@ -73,13 +73,19 @@
                     <div class="saprator my-3"><span>QR Code – Raquete</span></div>
                     <div class="text-center">
                         @php
-                            $checkUrl = route('check.status', $user->member_number, absolute: true);
-                            $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' . urlencode($checkUrl);
+                            $qrUrl = $user->qrCodeUrl();
                         @endphp
-                        <img src="{{ $qrUrl }}"
-                            alt="QR Code {{ $user->member_number }}"
-                            class="img-fluid rounded border"
-                            style="max-width: 260px; max-height: 260px;" />
+                        @if ($qrUrl)
+                            <img src="{{ $qrUrl }}"
+                                alt="QR Code {{ $user->member_number }}"
+                                class="img-fluid rounded border"
+                                style="max-width: 260px; max-height: 260px;" />
+                        @else
+                            <div class="border rounded p-4 text-muted">
+                                <i class="ti ti-alert-triangle fs-1 mb-3 opacity-25"></i>
+                                <p class="mb-0 small">QR Code não disponível</p>
+                            </div>
+                        @endif
                         <p class="mt-2 text-muted text-sm">
                             <strong>{{ $user->member_number }}</strong><br>
                             Escaneie para verificar adimplência

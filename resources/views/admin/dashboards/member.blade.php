@@ -39,13 +39,19 @@
                 </div>
                 <div class="card-body text-center py-4">
                     @php
-                        $checkUrl = route('check.status', $user->member_number, absolute: true);
-                        $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' . urlencode($checkUrl);
+                        $qrUrl = $user->qrCodeUrl();
                     @endphp
-                    <img src="{{ $qrUrl }}"
-                         alt="QR Code {{ $user->member_number }}"
-                         class="img-fluid rounded border"
-                         style="max-width: 220px; max-height: 220px;" />
+                    @if ($qrUrl)
+                        <img src="{{ $qrUrl }}"
+                             alt="QR Code {{ $user->member_number }}"
+                             class="img-fluid rounded border"
+                             style="max-width: 220px; max-height: 220px;" />
+                    @else
+                        <div class="border rounded p-4 text-muted">
+                            <i class="ti ti-alert-triangle fs-1 mb-3 opacity-25"></i>
+                            <p class="mb-0 small">QR Code não disponível</p>
+                        </div>
+                    @endif
                     <p class="mt-3 text-muted small">
                         <strong>{{ $user->member_number }}</strong><br>
                         Escaneie para verificar adimplência

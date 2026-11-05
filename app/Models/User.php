@@ -2,10 +2,15 @@
 
 namespace App\Models;
 
+use BaconQrCode\Creator;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Renderer\Svg\SvgBackEnd;
+use BaconQrCode\Writer;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Spatie\MediaLibrary\HasMedia;
@@ -61,6 +66,11 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
 
                 $lastNumber = $lastUser ? (int)substr($lastUser->member_number, -4) : 0;
                 $user->member_number = sprintf('VBT-%s-%04d', $year, $lastNumber + 1);
+            }
+
+            // Gerar e salvar QR Code SVG após definir o member_number
+            if (!empty($user->member_number)) {
+                $user->generateAndSaveQrCode();
             }
         });
     }
@@ -181,5 +191,38 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
         $this->addMediaCollection('profile_photo')
             ->singleFile() // only one profile photo per user
             ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/gif']);
+    }
+
+    /**
+     * Gera e salva o QR Code SVG do sócio no storage público.
+     * Chamado automaticamente no evento creating.
+     */
+    public function generateAndSaveQrCode(): void
+    {
+        $url = route('check.status', $this->member_number, absolute: true);
+
+        $renderer = new \BaconQrCode\Renderer\Image\Svg\SvgBackEnd();
+        $renderer->setRendererStyle(new RendererStyle(300, 300, margin: 10));
+
+        $writer = new Writer($renderer);
+        $result = $writer->write($url);
+
+        $contents = $result->getContents();
+
+        Storage::disk('public')->put("qrcodes/{$this->member_number}.svg", $contents);
+    }
+
+    /**
+     * Retorna a URL pública do QR Code salvo, ou null se não existir.
+     */
+    public function qrCodeUrl(): ?string
+    {
+        $path = "qrcodes/{$this->member_number}.svg";
+
+        if (Storage::disk('public')->exists($path)) {
+            return Storage::disk('public')->url($path);
+        }
+
+        return null;
     }
 }
