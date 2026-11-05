@@ -231,6 +231,42 @@ class MembershipController extends Controller
     }
 
     /**
+     * Aprova um pagamento pendente (marca como pago)
+     */
+    public function approve(Request $request, Membership $membership)
+    {
+        $authUser = auth()->user();
+
+        if (!$authUser->hasAnyRole(['admin', 'superadmin'])) {
+            abort(403, 'Apenas administradores podem aprovar pagamentos.');
+        }
+
+        if (!$authUser->hasRole('superadmin') && (int)$membership->association_id !== (int)$authUser->association_id) {
+            abort(403, 'Acesso não autorizado para sócios de outro clube.');
+        }
+
+        if ($membership->status === Membership::STATUS_PAID) {
+            return redirect()->route('admin.memberships.index')
+                ->with('toast', 'Esta mensalidade já está paga.');
+        }
+
+        $membership->update([
+            'status' => Membership::STATUS_PAID,
+            'paid_at' => now(),
+            'approved_by' => $authUser->id,
+            'approved_at' => now(),
+            'payment_method' => $membership->payment_method ?? 'pix',
+            'receipt_number' => $membership->receipt_number
+                ?: 'VBT-' . Carbon::parse($membership->reference_month)->format('Ym') . '-' . str_pad($membership->user_id, 4, '0', STR_PAD_LEFT),
+        ]);
+
+        return redirect()->route('admin.memberships.index')
+            ->with('toast', 'Pagamento aprovado: mensalidade de '
+                . Carbon::parse($membership->reference_month)->format('m/Y')
+                . ' de ' . ($membership->user?->name ?? 'sócio') . ' marcada como paga.');
+    }
+
+    /**
      * Gera pendências para todos os usuários ativos que não possuem registro no mês atual
      */
     public function generatePending(Request $request)
