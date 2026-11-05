@@ -2,10 +2,9 @@
 
 @section('title', 'Superadmin Dashboard')
 @section('breadcrumb-item', 'Dashboard')
-@section('breadcrumb-item-active', 'Platform Overview')
+@section('breadcrumb-item-active', 'Visão Geral')
 
 @section('css')
-    <link rel="stylesheet" href="{{ URL::asset('build/css/plugins/jsvectormap.min.css') }}">
 @endsection
 
 @section('content')
@@ -14,68 +13,77 @@
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
-    <div class="row">
+    {{-- Row 1: Financial cards --}}
+    <div class="row g-3">
 
-        {{-- Total Associations --}}
-        <div class="col-md-4 col-sm-6">
+        {{-- Entradas --}}
+        <div class="col-md-6 col-xxl-3">
             <div class="card statistics-card-1 overflow-hidden">
                 <div class="card-body">
-                    <img src="{{ URL::asset('build/images/widget/img-status-4.svg') }}" alt="img"
-                        class="img-fluid img-bg" />
-                    <h5 class="mb-4">Total Associations</h5>
-                    <div class="d-flex align-items-center mt-3">
-                        <h3 class="f-w-300 d-flex align-items-center m-b-0">{{ $associations['total'] }}</h3>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="avtar avtar-s bg-light-success"><i class="ph-duotone ph-arrow-circle-up f-20"></i></div>
+                        <span class="badge bg-light-success">Entradas</span>
                     </div>
-                    <div class="d-flex gap-2 text-sm mt-3 mb-2">
-                        <span class="badge bg-light-success">Validated: {{ $associations['validated'] }}</span>
-                        <span class="badge bg-light-warning">Pending: {{ $associations['pending'] }}</span>
-                    </div>
-                    <div class="progress" style="height: 7px">
-                        <div class="progress-bar bg-primary" role="progressbar"
-                            style="width: {{ $associations['progress'] }}%" aria-valuenow="{{ $associations['progress'] }}"
-                            aria-valuemin="0" aria-valuemax="100"></div>
+                    <h4 class="mt-3 mb-1 fw-semibold">
+                        {{ number_format($financials['totalInflow'], 2, ',', '.') }}
+                        <small class="text-muted">BRL</small>
+                    </h4>
+                    <div class="d-flex flex-wrap gap-1 mt-2">
+                        <span class="badge bg-light-secondary">Mensalidades: {{ number_format($financials['memberships'], 2, ',', '.') }}</span>
+                        <span class="badge bg-light-secondary">Aportes: {{ number_format($financials['cotisations'], 2, ',', '.') }}</span>
+                        <span class="badge bg-light-secondary">Diárias: {{ number_format($financials['contributions'], 2, ',', '.') }}</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        {{-- Total Users --}}
-        <div class="col-md-4 col-sm-6">
+        {{-- Saídas --}}
+        <div class="col-md-6 col-xxl-3">
             <div class="card statistics-card-1 overflow-hidden">
                 <div class="card-body">
-                    <img src="{{ URL::asset('build/images/widget/img-status-5.svg') }}" alt="img"
-                        class="img-fluid img-bg" />
-                    <h5 class="mb-4">Total Users (All Roles)</h5>
-                    <div class="d-flex align-items-center mt-3">
-                        <h3 class="f-w-300 d-flex align-items-center m-b-0">{{ $users['total'] }}</h3>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="avtar avtar-s bg-light-danger"><i class="ph-duotone ph-arrow-circle-down f-20"></i></div>
+                        <span class="badge bg-light-danger">Saídas</span>
                     </div>
-                    <div class="d-flex gap-2 text-sm mt-3 mb-2">
-                        <span class="badge bg-light-success">Active: {{ $users['active'] }}</span>
-                        <span class="badge bg-light-danger">Inactive: {{ $users['inactive'] }}</span>
-                    </div>
-                    <div class="progress" style="height: 7px">
-                        <div class="progress-bar bg-primary" role="progressbar" style="width: {{ $users['progress'] }}%"
-                            aria-valuenow="{{ $users['progress'] }}" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
+                    <h4 class="mt-3 mb-1 fw-semibold">
+                        {{ number_format($financials['totalOutflow'], 2, ',', '.') }}
+                        <small class="text-muted">BRL</small>
+                    </h4>
+                    <p class="text-sm text-muted mt-2 mb-0">Total de despesas registradas</p>
                 </div>
             </div>
         </div>
 
-        {{-- Total Cotisations --}}
-        <div class="col-md-4 col-sm-12">
-            <div class="card statistics-card-1 overflow-hidden bg-primary">
+        {{-- Saldo --}}
+        <div class="col-md-6 col-xxl-3">
+            <div class="card statistics-card-1 overflow-hidden">
                 <div class="card-body">
-                    <img src="{{ URL::asset('build/images/widget/img-status-6.svg') }}" alt="img"
-                        class="img-fluid img-bg" />
-                    <h5 class="mb-4 text-white">Total Cotisations (Global)</h5>
-                    <div class="d-flex align-items-center mt-3">
-                        <h3 class="text-white f-w-300 d-flex align-items-center m-b-0">
-                            {{ number_format($cotisations['total'], 2, ',', '.') }} BRL {{-- UPDATED --}}
-                        </h3>
+                    @php $saldoClass = $financials['delta'] >= 0 ? 'success' : 'danger'; @endphp
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="avtar avtar-s bg-light-{{ $saldoClass }}"><i class="ph-duotone ph-wallet f-20"></i></div>
+                        <span class="badge bg-light-{{ $saldoClass }}">Saldo Líquido</span>
                     </div>
-                    <p class="text-white text-opacity-75 mb-2 text-sm mt-3">All Payments Received</p>
-                    <div class="progress bg-white bg-opacity-10" style="height: 7px">
-                        <div class="progress-bar bg-white" role="progressbar" style="width: 100%"></div>
+                    <h4 class="mt-3 mb-1 fw-semibold text-{{ $saldoClass }}">
+                        {{ number_format($financials['delta'], 2, ',', '.') }}
+                        <small class="text-muted">BRL</small>
+                    </h4>
+                    <p class="text-sm text-muted mt-2 mb-0">Entradas menos saídas (caixa)</p>
+                </div>
+            </div>
+        </div>
+
+        {{-- Sócios --}}
+        <div class="col-md-6 col-xxl-3">
+            <div class="card statistics-card-1 overflow-hidden">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="avtar avtar-s bg-light-primary"><i class="ph-duotone ph-users f-20"></i></div>
+                        <span class="badge bg-light-primary">Sócios</span>
+                    </div>
+                    <h4 class="mt-3 mb-1 fw-semibold">{{ $users['total'] }}</h4>
+                    <div class="d-flex gap-1 mt-2">
+                        <span class="badge bg-light-success">Ativos: {{ $users['active'] }}</span>
+                        <span class="badge bg-light-danger">Inativos: {{ $users['inactive'] }}</span>
                     </div>
                 </div>
             </div>
@@ -83,61 +91,16 @@
 
     </div>
 
-
-    <div class="row">
-        {{-- LEFT COLUMN --}}
+    {{-- Row 2: Cashflow chart + Composition --}}
+    <div class="row g-3 mt-1">
         <div class="col-lg-8">
-            {{-- Events & Meetings --}}
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">Events & Meetings Summary (Platform-Wide)</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-6 col-xxl-3">
-                            <div class="card border mb-0 shadow-none">
-                                <div class="card-body p-3">
-                                    <h6 class="mb-0 text-muted">Total Meetings Held</h6>
-                                    <h5 class="my-2">{{ $meetings['held'] }}</h5>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-xxl-3">
-                            <div class="card border mb-0 shadow-none">
-                                <div class="card-body p-3">
-                                    <h6 class="mb-0 text-muted">Upcoming Meetings</h6>
-                                    <h5 class="my-2 text-info">{{ $meetings['upcoming'] }}</h5>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-xxl-3">
-                            <div class="card border mb-0 shadow-none">
-                                <div class="card-body p-3">
-                                    <h6 class="mb-0 text-muted">Total Active Events</h6>
-                                    <h5 class="my-2 text-warning">{{ $events['active'] }}</h5>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 col-xxl-3">
-                            <div class="card border mb-0 shadow-none">
-                                <div class="card-body p-3">
-                                    <h6 class="mb-0 text-muted">Total Event Attendees</h6>
-                                    <h5 class="my-2">{{ $events['attendees'] }}</h5>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Cashflow Chart --}}
-            <div class="card mt-4">
+            <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5>Global Cashflow (Cotisations)</h5>
+                    <h5 class="mb-0">Fluxo de Caixa (Entradas Consolidadas)</h5>
                     <select id="cashflow-range" class="form-select rounded-3 form-select-sm w-auto">
-                        <option value="30">Last 30 Days</option>
-                        <option value="180" selected>Last 6 Months</option>
-                        <option value="365">Yearly</option>
+                        <option value="30">Últimos 30 Dias</option>
+                        <option value="180" selected>Últimos 6 Meses</option>
+                        <option value="365">Últimos 12 Meses</option>
                     </select>
                 </div>
                 <div class="card-body">
@@ -146,35 +109,35 @@
             </div>
         </div>
 
-        {{-- RIGHT COLUMN --}}
         <div class="col-lg-4">
-            {{-- Cotisation Status --}}
             <div class="card h-100">
                 <div class="card-header">
-                    <h5 class="mb-0">Global Cotisation Status</h5>
+                    <h5 class="mb-0">Composição das Entradas</h5>
                 </div>
                 <div class="card-body d-flex flex-column">
-                    <div id="cotisation-donut-chart" class="my-auto"></div>
-                    <ul class="list-group mt-4 list-group-flush">
+                    <div id="composition-donut-chart" class="mx-auto mt-2"></div>
+                    <ul class="list-group mt-3 list-group-flush">
                         <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                            <span class="p-0 d-inline-flex align-items-center"><i
-                                    class="ti ti-circle-filled text-success me-2"></i>Paid</span>
-                            <span class="badge bg-light-success f-w-500">{{ $cotisationsStatus['paid'] }}</span>
+                            <span class="d-inline-flex align-items-center"><i class="ti ti-circle-filled text-success me-2"></i>Mensalidades</span>
+                            <span class="fw-semibold">{{ number_format($financials['memberships'], 2, ',', '.') }} BRL</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                            <span class="p-0 d-inline-flex align-items-center"><i
-                                    class="ti ti-circle-filled text-warning me-2"></i>Pending</span>
-                            <span class="badge bg-light-warning f-w-500">{{ $cotisationsStatus['pending'] }}</span>
+                            <span class="d-inline-flex align-items-center"><i class="ti ti-circle-filled text-warning me-2"></i>Aportes</span>
+                            <span class="fw-semibold">{{ number_format($financials['cotisations'], 2, ',', '.') }} BRL</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                            <span class="p-0 d-inline-flex align-items-center"><i
-                                    class="ti ti-circle-filled text-danger me-2"></i>Overdue</span>
-                            <span class="badge bg-light-danger f-w-500">{{ $cotisationsStatus['overdue'] }}</span>
+                            <span class="d-inline-flex align-items-center"><i class="ti ti-circle-filled text-primary me-2"></i>Diárias</span>
+                            <span class="fw-semibold">{{ number_format($financials['contributions'], 2, ',', '.') }} BRL</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                            <span class="p-0 d-inline-flex align-items-center"><i
-                                    class="ti ti-circle-filled text-secondary me-2"></i>Rejected</span>
-                            <span class="badge bg-light-secondary f-w-500">{{ $cotisationsStatus['rejected'] }}</span>
+                            <span class="d-inline-flex align-items-center text-danger"><i class="ti ti-circle-filled text-danger me-2"></i>Despesas</span>
+                            <span class="fw-semibold text-danger">- {{ number_format($financials['totalOutflow'], 2, ',', '.') }} BRL</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0 border-top">
+                            <span class="fw-semibold">Saldo Líquido</span>
+                            <span class="fw-bold {{ $financials['delta'] >= 0 ? 'text-success' : 'text-danger' }}">
+                                {{ number_format($financials['delta'], 2, ',', '.') }} BRL
+                            </span>
                         </li>
                     </ul>
                 </div>
@@ -182,88 +145,84 @@
         </div>
     </div>
 
-    {{-- TOP PERFORMING ASSOCIATIONS --}}
+    {{-- Row 3: Associations --}}
     <div class="row">
-    <div class="col-12">
-        <div class="card table-card mt-4">
-            <div class="card-header d-flex align-items-center justify-content-between py-3">
-                <h5 class="mb-0">Top Performing Associations</h5>
-                <a href="{{ route('admin.associations.index') }}" class="btn btn-sm btn-link-primary">
-                    View All Associations
-                </a>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Association Name</th>
-                                <th>Members</th>
-                                <th>Cotisations (YTD)</th>
-                                <th>Meetings Held</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse ($topAssociations ?? [] as $assoc)
+        <div class="col-12">
+            <div class="card table-card mt-4">
+                <div class="card-header d-flex align-items-center justify-content-between py-3">
+                    <h5 class="mb-0">Clubes por Receita</h5>
+                    <a href="{{ route('admin.associations.index') }}" class="btn btn-sm btn-link-primary">
+                        Ver Todos os Clubes
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
                                 <tr>
-                                    <td>
-                                        <h6 class="mb-0">{{ $assoc['name'] }}</h6>
-                                    </td>
-                                    <td>{{ $assoc['members'] }}</td>
-                                    <td>{{ number_format($assoc['cotisations'], 2, ',', '.') }} BRL</td>
-                                    <td>{{ $assoc['meetings'] }}</td>
-                                    <td>
-                                        <span class="badge bg-light-{{ $assoc['status_color'] }}">
-                                            {{ $assoc['status_label'] }}
-                                        </span>
-                                    </td>
+                                    <th>Clube</th>
+                                    <th>Sócios</th>
+                                    <th>Receitas (Mensalidades + Aportes + Diárias)</th>
+                                    <th>Status</th>
                                 </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="5" class="text-center text-muted">
-                                        No top performing associations found.
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @forelse ($topAssociations ?? [] as $assoc)
+                                    <tr>
+                                        <td>
+                                            <h6 class="mb-0">{{ $assoc['name'] }}</h6>
+                                        </td>
+                                        <td>{{ $assoc['members'] }}</td>
+                                        <td>{{ number_format($assoc['revenue'], 2, ',', '.') }} BRL</td>
+                                        <td>
+                                            <span class="badge bg-light-{{ $assoc['status_color'] }}">
+                                                {{ $assoc['status_label'] }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted">
+                                            Nenhum clube registrado.
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
 @endsection
 
 @section('scripts')
     <script src="{{ URL::asset('build/js/plugins/apexcharts.min.js') }}"></script>
     <script>
-        (function() {
-            var donutOptions = {
-                chart: {
-                    type: 'donut',
-                    height: 260
-                },
-                series: [
-                    {{ $cotisationsStatus['paid'] }},
-                    {{ $cotisationsStatus['pending'] }},
-                    {{ $cotisationsStatus['overdue'] }},
-                    {{ $cotisationsStatus['rejected'] }}
-                ],
-                labels: ['Paid', 'Pending', 'Overdue', 'Rejected'],
-                colors: ['var(--bs-success)', 'var(--bs-warning)', 'var(--bs-danger)', 'var(--bs-secondary)'],
-                legend: {
-                    show: false
-                },
-                dataLabels: {
-                    enabled: false
-                },
-            };
-            var donutChart = new ApexCharts(document.querySelector("#cotisation-donut-chart"), donutOptions);
-            donutChart.render();
-        })();
+        // Composição das Entradas (donut)
+        const compositionChart = new ApexCharts(document.querySelector("#composition-donut-chart"), {
+            chart: {
+                type: 'donut',
+                height: 200
+            },
+            series: [
+                {{ $financials['memberships'] }},
+                {{ $financials['cotisations'] }},
+                {{ $financials['contributions'] }}
+            ],
+            labels: ['Mensalidades', 'Aportes', 'Diárias'],
+            colors: ['var(--bs-success)', 'var(--bs-warning)', 'var(--bs-primary)'],
+            dataLabels: {
+                enabled: false
+            },
+            legend: {
+                show: false
+            }
+        });
+        compositionChart.render();
 
+        // Fluxo de Caixa (entradas consolidadas)
         const cashflowData = @json($cashflowData);
 
         const cashflowChart = new ApexCharts(document.querySelector("#cashflow-bar-chart"), {
@@ -274,17 +233,22 @@
                     show: false
                 }
             },
+            plotOptions: {
+                bar: {
+                    borderRadius: 4
+                }
+            },
             dataLabels: {
                 enabled: false
             },
             colors: ['var(--bs-primary)'],
-            series: cashflowData[180].series,
+            series: cashflowData['180'].series,
             xaxis: {
-                categories: cashflowData[180].categories
+                categories: cashflowData['180'].categories
             },
             yaxis: {
                 labels: {
-                    formatter: (val) => `${val / 1000}k BRL` // UPDATED
+                    formatter: (val) => `${Number(val).toLocaleString('pt-BR')} BRL`
                 }
             }
         });
@@ -300,5 +264,5 @@
             });
         });
     </script>
-    
+
 @endsection

@@ -46,6 +46,85 @@ class DashboardController extends Controller
     /**
      * Get Super Admin Dashboard data.
      */
+    private function getConsolidatedCashflowData($associationId = null)
+    {
+        $now = Carbon::now();
+
+        $membershipsQuery = \App\Models\Membership::where('status', \App\Models\Membership::STATUS_PAID)->whereNotNull('paid_at');
+        $cotisationsQuery = Cotisation::where('status', 1)->whereNotNull('paid_at');
+        $contributionsQuery = \App\Models\Contribution::query();
+
+        if ($associationId) {
+            $membershipsQuery->where('association_id', $associationId);
+            $cotisationsQuery->where('association_id', $associationId);
+            $contributionsQuery->where('association_id', $associationId);
+        }
+
+        $items = collect();
+
+        foreach ($membershipsQuery->get() as $m) {
+            $items->push(['date' => Carbon::parse($m->paid_at), 'amount' => (float)$m->amount]);
+        }
+        foreach ($cotisationsQuery->get() as $c) {
+            $items->push(['date' => Carbon::parse($c->paid_at), 'amount' => (float)$c->amount]);
+        }
+        foreach ($contributionsQuery->get() as $cb) {
+            $dateField = $cb->received_at ?? $cb->created_at;
+            $items->push(['date' => Carbon::parse($dateField), 'amount' => (float)$cb->amount]);
+        }
+
+        $days30Map = [];
+        for ($i = 30; $i >= 0; $i--) {
+            $d = $now->copy()->subDays($i)->format('Y-m-d');
+            $days30Map[$d] = 0.0;
+        }
+
+        $months180Map = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $m = $now->copy()->subMonths($i)->format('Y-m');
+            $months180Map[$m] = 0.0;
+        }
+
+        $months365Map = [];
+        for ($i = 11; $i >= 0; $i--) {
+            $m = $now->copy()->subMonths($i)->format('Y-m');
+            $months365Map[$m] = 0.0;
+        }
+
+        foreach ($items as $item) {
+            $dt = $item['date'];
+            $amt = $item['amount'];
+
+            $dKey = $dt->format('Y-m-d');
+            if (isset($days30Map[$dKey])) {
+                $days30Map[$dKey] += $amt;
+            }
+
+            $mKey = $dt->format('Y-m');
+            if (isset($months180Map[$mKey])) {
+                $months180Map[$mKey] += $amt;
+            }
+            if (isset($months365Map[$mKey])) {
+                $months365Map[$mKey] += $amt;
+            }
+        }
+
+        return [
+            '30' => [
+                'categories' => array_keys($days30Map),
+                'series' => [['name' => 'Entradas', 'data' => array_values($days30Map)]],
+            ],
+            '180' => [
+                'categories' => array_keys($months180Map),
+                'series' => [['name' => 'Entradas', 'data' => array_values($months180Map)]],
+            ],
+            '365' => [
+                'categories' => array_keys($months365Map),
+                'series' => [['name' => 'Entradas', 'data' => array_values($months365Map)]],
+            ],
+        ];
+    }
+
     protected function getSuperAdminDashboardData(): array
     {
         $now = Carbon::now();
@@ -78,17 +157,23 @@ class DashboardController extends Controller
                 : 0,
         ];
 
-        // Cotisations
-        $totalCotisations = Cotisation::sum('amount');
-        $cotisations = [
-            'total' => $totalCotisations,
-        ];
+        // Financials: Entradas / Saídas / Saldo
+        $membershipsPaidMAD = \App\Models\Membership::where('status', \App\Models\Membership::STATUS_PAID)->sum('amount');
+        $cotisationsPaidMAD = Cotisation::where('status', 1)->sum('amount');
+        $contributionsMAD = \App\Models\Contribution::sum('amount');
+        $expensesMAD = \App\Models\Expense::sum('amount');
 
-        $cotisationsStatus = [
-            'paid' => Cotisation::where('status', Cotisation::STATUS_PAID)->count(),
-            'pending' => Cotisation::where('status', Cotisation::STATUS_PENDING)->count(),
-            'overdue' => Cotisation::where('status', Cotisation::STATUS_OVERDUE)->count(),
-            'rejected' => Cotisation::where('status', Cotisation::STATUS_REJECTED)->count(),
+        $totalInflow = $membershipsPaidMAD + $cotisationsPaidMAD + $contributionsMAD;
+        $totalOutflow = $expensesMAD;
+        $cashflowDelta = $totalInflow - $totalOutflow;
+
+        $financials = [
+            'memberships' => $membershipsPaidMAD,
+            'cotisations' => $cotisationsPaidMAD,
+            'contributions' => $contributionsMAD,
+            'totalInflow' => $totalInflow,
+            'totalOutflow' => $totalOutflow,
+            'delta' => $cashflowDelta,
         ];
 
         // Meetings
@@ -108,116 +193,39 @@ class DashboardController extends Controller
             'attendees' => 0,
         ];
 
-        // Cashflow for charts
+        // Cashflow for charts (Consolidated)
+        $cashflowData = $this->getConsolidatedCashflowData();
 
-        // --- Last 30 days (daily sums) ---
-        $cashflow30 = Cotisation::select(
-            DB::raw("DATE_FORMAT(paid_at, '%Y-%m-%d') as day"),
-            DB::raw('SUM(amount) as total')
-        )
-            ->where('status', Cotisation::STATUS_PAID)
-            ->whereNotNull('paid_at')
-            ->where('paid_at', '>=', $now->copy()->subDays(30)->startOfDay())
-            ->groupBy('day')
-            ->orderBy('day')
-            ->get();
-
-        $days30 = $cashflow30->pluck('day')->toArray();
-        $totals30 = $cashflow30->pluck('total')->toArray();
-
-        // --- Last 6 months (monthly sums) ---
-        $cashflow180 = Cotisation::select(
-            DB::raw("DATE_FORMAT(paid_at, '%Y-%m') as month"),
-            DB::raw('SUM(amount) as total')
-        )
-            ->where('status', Cotisation::STATUS_PAID)
-            ->whereNotNull('paid_at')
-            ->where('paid_at', '>=', $now->copy()->subMonths(6)->startOfMonth())
-            ->groupBy('month')
-            ->orderBy('month')
-            ->get();
-
-        $months180 = $cashflow180->pluck('month')->toArray();
-        $totals180 = $cashflow180->pluck('total')->toArray();
-
-        // --- Last 365 days (monthly sums) ---
-        $cashflow365 = Cotisation::select(
-            DB::raw("DATE_FORMAT(paid_at, '%Y-%m') as month"),
-            DB::raw('SUM(amount) as total')
-        )
-            ->where('status', Cotisation::STATUS_PAID)
-            ->whereNotNull('paid_at')
-            ->where('paid_at', '>=', $now->copy()->subDays(365)->startOfMonth())
-            ->groupBy('month')
-            ->orderBy('month')
-            ->get();
-
-        $months365 = $cashflow365->pluck('month')->toArray();
-        $totals365 = $cashflow365->pluck('total')->toArray();
-
-        $cashflowData = [
-            '30' => [
-                'categories' => $days30,
-                'series' => [
-                    [
-                        'name' => 'Cotisations',
-                        'data' => $totals30,
-                    ]
-                ],
-            ],
-            '180' => [
-                'categories' => $months180,
-                'series' => [
-                    [
-                        'name' => 'Cotisations',
-                        'data' => $totals180,
-                    ]
-                ],
-            ],
-            '365' => [
-                'categories' => $months365,
-                'series' => [
-                    [
-                        'name' => 'Cotisations',
-                        'data' => $totals365,
-                    ]
-                ],
-            ],
-        ];
-
-        // Top Associations
-        $topAssociations = Association::leftJoin('users', 'users.association_id', '=', 'associations.id')
-            ->leftJoin('cotisations', 'cotisations.association_id', '=', 'associations.id')
-            ->leftJoin('meetings', 'meetings.association_id', '=', 'associations.id')
-            ->select(
-                'associations.id',
-                'associations.name',
-                DB::raw('COUNT(DISTINCT users.id) as members'),
-                DB::raw('SUM(cotisations.amount) as cotisations'),
-                DB::raw('COUNT(DISTINCT meetings.id) as meetings'),
-                'associations.is_validated'
-            )
-            ->groupBy('associations.id', 'associations.name', 'associations.is_validated')
-            ->orderByDesc(DB::raw('SUM(cotisations.amount)'))
-            ->limit(5)
+        // Top Associations (Receitas consolidadas)
+        $topAssociations = Association::select('associations.id', 'associations.name', 'associations.is_validated')
             ->get()
             ->map(function ($assoc) {
+                $membersCount = User::where('association_id', $assoc->id)->count();
+                $membershipsSum = \App\Models\Membership::where('association_id', $assoc->id)
+                    ->where('status', \App\Models\Membership::STATUS_PAID)
+                    ->sum('amount');
+                $cotisationsSum = Cotisation::where('association_id', $assoc->id)
+                    ->where('status', 1)
+                    ->sum('amount');
+                $contributionsSum = \App\Models\Contribution::where('association_id', $assoc->id)
+                    ->sum('amount');
+
                 return [
                     'name' => $assoc->name,
-                    'members' => $assoc->members,
-                    'cotisations' => $assoc->cotisations ?? 0,
-                    'meetings' => $assoc->meetings,
-                    'status_label' => $assoc->is_validated ? 'Active' : 'Pending Approval',
+                    'members' => $membersCount,
+                    'revenue' => $membershipsSum + $cotisationsSum + $contributionsSum,
+                    'status_label' => $assoc->is_validated ? 'Ativo' : 'Pendente',
                     'status_color' => $assoc->is_validated ? 'success' : 'warning',
                 ];
             })
+            ->sortByDesc('revenue')
+            ->values()
+            ->take(5)
             ->toArray();
 
         return compact(
-            'associations',
             'users',
-            'cotisations',
-            'cotisationsStatus',
+            'financials',
             'meetings',
             'events',
             'topAssociations',
@@ -257,11 +265,34 @@ class DashboardController extends Controller
                 : 0,
         ];
 
-        // Cotisations
-        $totalCotisations = Cotisation::where('association_id', $associationId)->sum('amount');
+        // Financials: Entradas / Saídas / Saldo
+        $membershipsPaidMAD = \App\Models\Membership::where('association_id', $associationId)
+            ->where('status', \App\Models\Membership::STATUS_PAID)
+            ->sum('amount');
+        $cotisationsPaidMAD = Cotisation::where('association_id', $associationId)
+            ->where('status', 1)
+            ->sum('amount');
+        $contributionsMAD = \App\Models\Contribution::where('association_id', $associationId)
+            ->sum('amount');
+        $expensesMAD = \App\Models\Expense::where('association_id', $associationId)
+            ->sum('amount');
 
+        $totalInflow = $membershipsPaidMAD + $cotisationsPaidMAD + $contributionsMAD;
+        $totalOutflow = $expensesMAD;
+        $cashflowDelta = $totalInflow - $totalOutflow;
+
+        $financials = [
+            'memberships' => $membershipsPaidMAD,
+            'cotisations' => $cotisationsPaidMAD,
+            'contributions' => $contributionsMAD,
+            'totalInflow' => $totalInflow,
+            'totalOutflow' => $totalOutflow,
+            'delta' => $cashflowDelta,
+        ];
+
+        // Compatibilidade
         $cotisations = [
-            'total' => $totalCotisations,
+            'total' => $totalInflow,
         ];
 
         $cotisationsStatus = [
@@ -299,41 +330,15 @@ class DashboardController extends Controller
             'active' => $activeEvents,
         ];
 
-        // Cashflow for charts (past 12 months)
-        $cashflow = Cotisation::select(
-            DB::raw("DATE_FORMAT(paid_at, '%Y-%m') as month"),
-            DB::raw('SUM(amount) as total')
-        )
+        // Cashflow for charts (Consolidated: Mensalidades + Aportes + Diárias)
+        $cashflowData = $this->getConsolidatedCashflowData($associationId);
+
+        // Recent memberships
+        $recentMemberships = \App\Models\Membership::with('user')
             ->where('association_id', $associationId)
-            ->where('status', Cotisation::STATUS_PAID)
-            ->whereNotNull('paid_at')
-            ->where('paid_at', '>=', $now->copy()->subMonths(12)->startOfMonth())
-            ->groupBy('month')
-            ->orderBy('month')
+            ->orderByDesc('created_at')
+            ->take(5)
             ->get();
-
-        $cashflowMonths = $cashflow->pluck('month')->toArray();
-        $cashflowTotals = $cashflow->pluck('total')->toArray();
-
-        $cashflowData = [
-            '180' => [
-                'categories' => $cashflowMonths,
-                'series' => [
-                    [
-                        'name' => 'Cotisations',
-                        'data' => $cashflowTotals,
-                    ]
-                ],
-            ],
-            '30' => [
-                'categories' => [],
-                'series' => [[]],
-            ],
-            '365' => [
-                'categories' => [],
-                'series' => [[]],
-            ],
-        ];
 
         // Recent cotisations
         $recentCotisations = Cotisation::with('user')
@@ -345,11 +350,11 @@ class DashboardController extends Controller
         return compact(
             'association',
             'users',
-            'cotisations',
-            'cotisationsStatus',
+            'financials',
             'meetings',
             'events',
             'cashflowData',
+            'recentMemberships',
             'recentCotisations'
         );
     }
@@ -383,11 +388,34 @@ class DashboardController extends Controller
                 : 0,
         ];
 
-        // Cotisations
-        $totalCotisations = Cotisation::where('association_id', $associationId)->sum('amount');
+        // Financials: Entradas / Saídas / Saldo
+        $membershipsPaidMAD = \App\Models\Membership::where('association_id', $associationId)
+            ->where('status', \App\Models\Membership::STATUS_PAID)
+            ->sum('amount');
+        $cotisationsPaidMAD = Cotisation::where('association_id', $associationId)
+            ->where('status', 1)
+            ->sum('amount');
+        $contributionsMAD = \App\Models\Contribution::where('association_id', $associationId)
+            ->sum('amount');
+        $expensesMAD = \App\Models\Expense::where('association_id', $associationId)
+            ->sum('amount');
 
+        $totalInflow = $membershipsPaidMAD + $cotisationsPaidMAD + $contributionsMAD;
+        $totalOutflow = $expensesMAD;
+        $cashflowDelta = $totalInflow - $totalOutflow;
+
+        $financials = [
+            'memberships' => $membershipsPaidMAD,
+            'cotisations' => $cotisationsPaidMAD,
+            'contributions' => $contributionsMAD,
+            'totalInflow' => $totalInflow,
+            'totalOutflow' => $totalOutflow,
+            'delta' => $cashflowDelta,
+        ];
+
+        // Compatibilidade
         $cotisations = [
-            'total' => $totalCotisations,
+            'total' => $totalInflow,
         ];
 
         $cotisationsStatus = [
@@ -425,41 +453,8 @@ class DashboardController extends Controller
             'active' => $activeEvents,
         ];
 
-        // Cashflow chart (last 12 months)
-        $cashflow = Cotisation::select(
-            DB::raw("DATE_FORMAT(paid_at, '%Y-%m') as month"),
-            DB::raw('SUM(amount) as total')
-        )
-            ->where('association_id', $associationId)
-            ->where('status', Cotisation::STATUS_PAID)
-            ->whereNotNull('paid_at')
-            ->where('paid_at', '>=', $now->copy()->subMonths(12)->startOfMonth())
-            ->groupBy('month')
-            ->orderBy('month')
-            ->get();
-
-        $cashflowMonths = $cashflow->pluck('month')->toArray();
-        $cashflowTotals = $cashflow->pluck('total')->toArray();
-
-        $cashflowData = [
-            '180' => [
-                'categories' => $cashflowMonths,
-                'series' => [
-                    [
-                        'name' => 'Cotisations',
-                        'data' => $cashflowTotals,
-                    ]
-                ],
-            ],
-            '30' => [
-                'categories' => [],
-                'series' => [[]],
-            ],
-            '365' => [
-                'categories' => [],
-                'series' => [[]],
-            ],
-        ];
+        // Cashflow chart (Consolidated: Mensalidades + Aportes + Diárias)
+        $cashflowData = $this->getConsolidatedCashflowData($associationId);
 
         // Recent activities (static for now)
         $recentActivities = collect([
@@ -486,6 +481,7 @@ class DashboardController extends Controller
         return compact(
             'association',
             'users',
+            'financials',
             'cotisations',
             'cotisationsStatus',
             'meetings',
@@ -570,41 +566,8 @@ class DashboardController extends Controller
                 ->count(),
         ];
 
-        // Cashflow chart (last 12 months)
-        $cashflow = Cotisation::select(
-            DB::raw("DATE_FORMAT(paid_at, '%Y-%m') as month"),
-            DB::raw('SUM(amount) as total')
-        )
-            ->where('association_id', $associationId)
-            ->where('status', Cotisation::STATUS_PAID)
-            ->whereNotNull('paid_at')
-            ->where('paid_at', '>=', $now->copy()->subMonths(12)->startOfMonth())
-            ->groupBy('month')
-            ->orderBy('month')
-            ->get();
-
-        $cashflowMonths = $cashflow->pluck('month')->toArray();
-        $cashflowTotals = $cashflow->pluck('total')->toArray();
-
-        $cashflowData = [
-            '180' => [
-                'categories' => $cashflowMonths,
-                'series' => [
-                    [
-                        'name' => 'Cotisations',
-                        'data' => $cashflowTotals,
-                    ]
-                ],
-            ],
-            '30' => [
-                'categories' => [],
-                'series' => [[]],
-            ],
-            '365' => [
-                'categories' => [],
-                'series' => [[]],
-            ],
-        ];
+        // Cashflow chart (Consolidated: Mensalidades + Aportes + Diárias)
+        $cashflowData = $this->getConsolidatedCashflowData($associationId);
 
         // Recent activities (static examples)
         $recentActivities = collect([

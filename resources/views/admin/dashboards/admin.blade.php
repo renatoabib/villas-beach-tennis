@@ -2,131 +2,116 @@
 
 @section('title', 'Admin Dashboard')
 @section('breadcrumb-item', 'Dashboard')
-@section('breadcrumb-item-active', 'Association Management')
+@section('breadcrumb-item-active', 'Gestão do Clube')
 
 @section('css')
-    <link rel="stylesheet" href="{{ URL::asset('build/css/plugins/jsvectormap.min.css') }}">
 @endsection
 
 @section('content')
     <div class="row align-items-center mb-3">
         <div class="col-md-8">
             <p class="text-muted mb-0">
-                Manage your members, finances, and engagement for
+                Gerencie sócios, finanças e atividades do clube
                 <strong>{{ $association->name }}</strong>.
             </p>
         </div>
         <div class="col-md-4 text-md-end mt-3 mt-md-0">
             <a href="{{ route('admin.membres.create') }}" class="btn btn-primary d-inline-flex align-items-center">
-                <i class="ti ti-user-plus me-2"></i>Add New Member
+                <i class="ti ti-user-plus me-2"></i>Novo Sócio
             </a>
         </div>
     </div>
 
-    <div class="row">
-        <!-- Member Statistics -->
-        <div class="col-md-6 col-lg-3">
-            <div class="card">
-                <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="avtar avtar-s bg-light-primary"><i class="ti ti-users f-20"></i></div>
-                        <h6 class="ms-3 mb-0">Member Statistics</h6>
-                    </div>
-                    <div class="d-flex align-items-center justify-content-between mt-3">
-                        <h4 class="mb-0">{{ $users['total'] }}</h4>
-                        <span class="badge bg-light-primary">Active: {{ $users['active'] }}</span>
-                    </div>
-                    <div class="text-end mt-1">
-                        <span class="badge bg-light-danger">Inactive: {{ $users['inactive'] }}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
+    {{-- Row 1: Financial cards --}}
+    <div class="row g-3">
 
-        <!-- Cotisations -->
-        <div class="col-md-6 col-lg-3">
+        {{-- Entradas --}}
+        <div class="col-md-6 col-xxl-3">
             <div class="card">
                 <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="avtar avtar-s bg-light-success"><i class="ti ti-wallet f-20"></i></div>
-                        <h6 class="ms-3 mb-0">Cotisations (YTD)</h6>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="avtar avtar-s bg-light-success"><i class="ph-duotone ph-arrow-circle-up f-20"></i></div>
+                        <span class="badge bg-light-success">Entradas</span>
                     </div>
-                    <h4 class="mt-3 mb-0">
-                        {{ number_format($cotisations['total'], 0, ',', '.') }} BRL
-                        <span class="text-success text-sm fw-normal">/ 50,000 BRL Target</span>
+                    <h4 class="mt-3 mb-1 fw-semibold">
+                        {{ number_format($financials['totalInflow'], 2, ',', '.') }}
+                        <small class="text-muted">BRL</small>
                     </h4>
-                    @php
-                        $target = 50000;
-                        $progress =
-                            $cotisations['total'] > 0 ? min(round(($cotisations['total'] / $target) * 100, 1), 100) : 0;
-                    @endphp
-                    <div class="progress mt-2" style="height: 7px">
-                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ $progress }}%"
-                            aria-valuenow="{{ $progress }}" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="d-flex flex-wrap gap-1 mt-2">
+                        <span class="badge bg-light-secondary">Mensalidades: {{ number_format($financials['memberships'], 2, ',', '.') }}</span>
+                        <span class="badge bg-light-secondary">Aportes: {{ number_format($financials['cotisations'], 2, ',', '.') }}</span>
+                        <span class="badge bg-light-secondary">Diárias: {{ number_format($financials['contributions'], 2, ',', '.') }}</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Meetings -->
-        <div class="col-md-6 col-lg-3">
+        {{-- Saídas --}}
+        <div class="col-md-6 col-xxl-3">
             <div class="card">
                 <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="avtar avtar-s bg-light-info">
-                            <i class="ti ti-calendar-event f-20"></i>
-                        </div>
-                        <h6 class="ms-3 mb-0">Upcoming Meetings</h6>
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="avtar avtar-s bg-light-danger"><i class="ph-duotone ph-arrow-circle-down f-20"></i></div>
+                        <span class="badge bg-light-danger">Saídas</span>
                     </div>
-                    <div class="d-flex align-items-center justify-content-between mt-3">
-                        <h4 class="mb-0">{{ $meetings['upcoming'] }}</h4>
-                    </div>
-                    <p class="text-sm text-muted mt-1 mb-0">
-                        @if ($meetings['upcoming'] > 0)
-                            Next meeting scheduled soon
-                        @else
-                            No upcoming meetings
-                        @endif
-                    </p>
+                    <h4 class="mt-3 mb-1 fw-semibold">
+                        {{ number_format($financials['totalOutflow'], 2, ',', '.') }}
+                        <small class="text-muted">BRL</small>
+                    </h4>
+                    <p class="text-sm text-muted mt-2 mb-0">Total de despesas registradas</p>
                 </div>
-
             </div>
         </div>
 
-        <!-- Events -->
-        <div class="col-md-6 col-lg-3">
+        {{-- Saldo --}}
+        <div class="col-md-6 col-xxl-3">
             <div class="card">
                 <div class="card-body">
-                    <div class="d-flex align-items-center">
-                        <div class="avtar avtar-s bg-light-warning"><i class="ti ti-ticket f-20"></i></div>
-                        <h6 class="ms-3 mb-0">Active Events</h6>
+                    @php $saldoClass = $financials['delta'] >= 0 ? 'success' : 'danger'; @endphp
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="avtar avtar-s bg-light-{{ $saldoClass }}"><i class="ph-duotone ph-wallet f-20"></i></div>
+                        <span class="badge bg-light-{{ $saldoClass }}">Saldo Líquido</span>
                     </div>
-                    <div class="d-flex align-items-center justify-content-between mt-3">
-                        <h4 class="mb-0">{{ $events['active'] }}</h4>
-                        <a href="{{ route('admin.events.create') }}"
-                            class="btn btn-sm btn-warning d-inline-flex align-items-center">
-                            <i class="ti ti-ticket-plus me-1"></i> Create
-                        </a>
-                    </div>
-                    <p class="text-sm text-muted mt-1 mb-0">
-                        Total registrations not tracked
-                    </p>
+                    <h4 class="mt-3 mb-1 fw-semibold text-{{ $saldoClass }}">
+                        {{ number_format($financials['delta'], 2, ',', '.') }}
+                        <small class="text-muted">BRL</small>
+                    </h4>
+                    <p class="text-sm text-muted mt-2 mb-0">Entradas menos saídas (caixa)</p>
                 </div>
             </div>
         </div>
+
+        {{-- Sócios --}}
+        <div class="col-md-6 col-xxl-3">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="avtar avtar-s bg-light-primary"><i class="ph-duotone ph-users f-20"></i></div>
+                        <span class="badge bg-light-primary">Sócios</span>
+                    </div>
+                    <h4 class="mt-3 mb-1 fw-semibold">{{ $users['total'] }}</h4>
+                    <div class="d-flex flex-wrap gap-1 mt-2">
+                        <span class="badge bg-light-success">Ativos: {{ $users['active'] }}</span>
+                        <span class="badge bg-light-danger">Inativos: {{ $users['inactive'] }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <!-- Charts and Recent Activity -->
-    <div class="row">
+    {{-- Row 2: Chart + Recent + Actions --}}
+    <div class="row g-3 mt-1">
+
+        {{-- LEFT --}}
         <div class="col-lg-8">
-            <!-- Cashflow Chart -->
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5>Monthly Cotisation Collection</h5>
-                    <select id="cotisation-range" class="form-select rounded-3 form-select-sm w-auto">
-                        <option value="30">Last 30 Days</option>
-                        <option value="180" selected>Last 6 Months</option>
-                        <option value="365">Yearly</option>
+                    <h5 class="mb-0">Fluxo de Caixa (Entradas Consolidadas)</h5>
+                    <select id="cashflow-range" class="form-select rounded-3 form-select-sm w-auto">
+                        <option value="30">Últimos 30 Dias</option>
+                        <option value="180" selected>Últimos 6 Meses</option>
+                        <option value="365">Últimos 12 Meses</option>
                     </select>
                 </div>
                 <div class="card-body">
@@ -134,16 +119,18 @@
                 </div>
             </div>
 
-            <!-- Recent Cotisations -->
             <div class="card table-card mt-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5>Recent Cotisations</h5>
+                    <h5 class="mb-0">Últimas Mensalidades</h5>
+                    <a href="{{ route('admin.memberships.index') }}" class="btn btn-sm btn-link-primary">
+                        Ver Todas
+                    </a>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-hover">
                             <tbody>
-                                @forelse($recentCotisations as $cotisation)
+                                @forelse($recentMemberships as $membership)
                                     <tr>
                                         <td>
                                             <div class="d-flex align-items-center">
@@ -151,29 +138,38 @@
                                                     <i class="ti ti-user"></i>
                                                 </div>
                                                 <h6 class="mb-0 ms-3">
-                                                    {{ $cotisation->user?->name ?? 'Unknown' }}
+                                                    {{ $membership->user?->name ?? 'Desconhecido' }}
                                                 </h6>
                                             </div>
                                         </td>
                                         <td>
-                                            Paid cotisation:
-                                            <span class="fw-bold">
-                                                {{ number_format($cotisation->amount, 2, ',', '.') }} BRL
+                                            <span class="fw-bold">{{ number_format($membership->amount, 2, ',', '.') }} BRL</span>
+                                            @php
+                                                $statusColors = [
+                                                    'paid' => 'bg-light-success',
+                                                    'pending' => 'bg-light-warning',
+                                                    'overdue' => 'bg-light-danger',
+                                                    'rejected' => 'bg-light-secondary',
+                                                ];
+                                                $statusLabels = [
+                                                    'paid' => 'Pago',
+                                                    'pending' => 'Pendente',
+                                                    'overdue' => 'Vencido',
+                                                    'rejected' => 'Rejeitado',
+                                                ];
+                                            @endphp
+                                            <span class="badge {{ $statusColors[$membership->status] ?? 'bg-light' }} ms-2">
+                                                {{ $statusLabels[$membership->status] ?? ucfirst($membership->status) }}
                                             </span>
-                                            @if ($cotisation->status)
-                                                <span class="badge bg-light ms-2 text-dark">
-                                                    {{ ucfirst($cotisation->status) }}
-                                                </span>
-                                            @endif
                                         </td>
                                         <td class="text-end text-muted">
-                                            <small>{{ $cotisation->created_at->diffForHumans() }}</small>
+                                            <small>{{ $membership->created_at->diffForHumans() }}</small>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="3" class="text-center">
-                                            No recent cotisations found.
+                                        <td colspan="3" class="text-center text-muted">
+                                            Nenhuma mensalidade lançada ainda.
                                         </td>
                                     </tr>
                                 @endforelse
@@ -182,58 +178,64 @@
                     </div>
                 </div>
             </div>
-
         </div>
 
+        {{-- RIGHT --}}
         <div class="col-lg-4">
-            <!-- Quick Actions -->
             <div class="card">
                 <div class="card-header">
-                    <h5 class="mb-0">Quick Actions</h5>
+                    <h5 class="mb-0">Ações Rápidas</h5>
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
-                        <a href="{{ route('admin.events.create') }}"
+                        <a href="{{ route('admin.memberships.create') }}"
                             class="btn btn-outline-primary d-inline-flex align-items-center justify-content-center">
-                            <i class="ti ti-calendar-plus me-2"></i>Create New Event
+                            <i class="ti ti-wallet me-2"></i>Nova Mensalidade
                         </a>
                         <a href="{{ route('admin.cotisations.create') }}"
                             class="btn btn-outline-success d-inline-flex align-items-center justify-content-center">
-                            <i class="ti ti-currency-dollar me-2"></i>New Cotisation
+                            <i class="ti ti-currency-dollar me-2"></i>Novo Aporte
                         </a>
                         <a href="{{ route('admin.contributions.create') }}"
                             class="btn btn-outline-secondary d-inline-flex align-items-center justify-content-center">
-                            <i class="ti ti-cash me-2"></i>New Contribution
+                            <i class="ti ti-cash me-2"></i>Nova Diária
+                        </a>
+                        <a href="{{ route('admin.events.create') }}"
+                            class="btn btn-outline-warning d-inline-flex align-items-center justify-content-center">
+                            <i class="ti ti-calendar-plus me-2"></i>Novo Evento
                         </a>
                     </div>
                 </div>
             </div>
 
-            <!-- Cotisation Status Donut -->
-            <div class="card mt-4">
+            <div class="card mt-4 h-100">
                 <div class="card-header">
-                    <h5 class="mb-0">Cotisation Status</h5>
+                    <h5 class="mb-0">Composição das Entradas</h5>
                 </div>
-                <div class="card-body">
-                    <div id="cotisation-status-donut" class="mt-2"></div>
-                    <ul class="list-group list-group-flush mt-4">
+                <div class="card-body d-flex flex-column">
+                    <div id="composition-donut-chart" class="mx-auto mt-2"></div>
+                    <ul class="list-group list-group-flush mt-3">
                         <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                            <span class="p-0 d-inline-flex align-items-center">
-                                <i class="ti ti-circle-filled text-success me-2"></i>Paid
-                            </span>
-                            <span class="badge bg-light-success f-w-500">{{ $cotisationsStatus['paid'] }}</span>
+                            <span class="d-inline-flex align-items-center"><i class="ti ti-circle-filled text-success me-2"></i>Mensalidades</span>
+                            <span class="fw-semibold">{{ number_format($financials['memberships'], 2, ',', '.') }} BRL</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                            <span class="p-0 d-inline-flex align-items-center">
-                                <i class="ti ti-circle-filled text-warning me-2"></i>Pending
-                            </span>
-                            <span class="badge bg-light-warning f-w-500">{{ $cotisationsStatus['pending'] }}</span>
+                            <span class="d-inline-flex align-items-center"><i class="ti ti-circle-filled text-warning me-2"></i>Aportes</span>
+                            <span class="fw-semibold">{{ number_format($financials['cotisations'], 2, ',', '.') }} BRL</span>
                         </li>
                         <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                            <span class="p-0 d-inline-flex align-items-center">
-                                <i class="ti ti-circle-filled text-danger me-2"></i>Overdue
+                            <span class="d-inline-flex align-items-center"><i class="ti ti-circle-filled text-primary me-2"></i>Diárias</span>
+                            <span class="fw-semibold">{{ number_format($financials['contributions'], 2, ',', '.') }} BRL</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            <span class="d-inline-flex align-items-center text-danger"><i class="ti ti-circle-filled text-danger me-2"></i>Despesas</span>
+                            <span class="fw-semibold text-danger">- {{ number_format($financials['totalOutflow'], 2, ',', '.') }} BRL</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0 border-top">
+                            <span class="fw-semibold">Saldo Líquido</span>
+                            <span class="fw-bold {{ $financials['delta'] >= 0 ? 'text-success' : 'text-danger' }}">
+                                {{ number_format($financials['delta'], 2, ',', '.') }} BRL
                             </span>
-                            <span class="badge bg-light-danger f-w-500">{{ $cotisationsStatus['overdue'] }}</span>
                         </li>
                     </ul>
                 </div>
@@ -245,29 +247,32 @@
 @section('scripts')
     <script src="{{ URL::asset('build/js/plugins/apexcharts.min.js') }}"></script>
     <script>
-        new ApexCharts(document.querySelector("#cotisation-status-donut"), {
+        // Composição das Entradas (donut)
+        const compositionChart = new ApexCharts(document.querySelector("#composition-donut-chart"), {
             chart: {
                 type: 'donut',
                 height: 200
             },
             series: [
-                {{ $cotisationsStatus['paid'] }},
-                {{ $cotisationsStatus['pending'] }},
-                {{ $cotisationsStatus['overdue'] }}
+                {{ $financials['memberships'] }},
+                {{ $financials['cotisations'] }},
+                {{ $financials['contributions'] }}
             ],
-            labels: ['Paid', 'Pending', 'Overdue'],
-            colors: ['var(--bs-success)', 'var(--bs-warning)', 'var(--bs-danger)'],
+            labels: ['Mensalidades', 'Aportes', 'Diárias'],
+            colors: ['var(--bs-success)', 'var(--bs-warning)', 'var(--bs-primary)'],
             dataLabels: {
                 enabled: false
             },
             legend: {
                 show: false
             }
-        }).render();
+        });
+        compositionChart.render();
 
-        const cotisationChartData = @json($cashflowData);
+        // Fluxo de Caixa (entradas consolidadas)
+        const cashflowData = @json($cashflowData);
 
-        const cotisationChart = new ApexCharts(document.querySelector("#association-cotisations-chart"), {
+        const cashflowChart = new ApexCharts(document.querySelector("#association-cotisations-chart"), {
             chart: {
                 type: 'bar',
                 height: 300,
@@ -284,9 +289,9 @@
                 enabled: false
             },
             colors: ['var(--bs-primary)'],
-            series: cotisationChartData[180].series,
+            series: cashflowData['180'].series,
             xaxis: {
-                categories: cotisationChartData[180].categories
+                categories: cashflowData['180'].categories
             },
             yaxis: {
                 labels: {
@@ -295,21 +300,17 @@
             }
         });
 
-        cotisationChart.render();
+        cashflowChart.render();
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const select = document.getElementById('cotisation-range');
-            if (select) {
-                select.addEventListener('change', function() {
-                    const selected = this.value;
-                    cotisationChart.updateOptions({
-                        series: cotisationChartData[selected].series,
-                        xaxis: {
-                            categories: cotisationChartData[selected].categories
-                        }
-                    });
-                });
-            }
+        document.getElementById('cashflow-range').addEventListener('change', function() {
+            const range = this.value;
+            cashflowChart.updateOptions({
+                series: cashflowData[range].series,
+                xaxis: {
+                    categories: cashflowData[range].categories
+                }
+            });
         });
     </script>
+
 @endsection
