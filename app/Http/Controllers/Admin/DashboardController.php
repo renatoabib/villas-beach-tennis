@@ -202,6 +202,9 @@ class DashboardController extends Controller
             'totalInflow' => $totalInflow,
             'totalOutflow' => $totalOutflow,
             'delta' => $cashflowDelta,
+            'membershipsCount' => \App\Models\Membership::where('status', \App\Models\Membership::STATUS_PAID)->count(),
+            'contributionsCount' => \App\Models\Contribution::count(),
+            'expensesCount' => \App\Models\Expense::count(),
         ];
 
         // Meetings
@@ -316,6 +319,10 @@ class DashboardController extends Controller
             'totalInflow' => $totalInflow,
             'totalOutflow' => $totalOutflow,
             'delta' => $cashflowDelta,
+            'membershipsCount' => \App\Models\Membership::where('association_id', $associationId)
+                ->where('status', \App\Models\Membership::STATUS_PAID)->count(),
+            'contributionsCount' => \App\Models\Contribution::where('association_id', $associationId)->count(),
+            'expensesCount' => \App\Models\Expense::where('association_id', $associationId)->count(),
         ];
 
         // Compatibilidade
@@ -439,6 +446,10 @@ class DashboardController extends Controller
             'totalInflow' => $totalInflow,
             'totalOutflow' => $totalOutflow,
             'delta' => $cashflowDelta,
+            'membershipsCount' => \App\Models\Membership::where('association_id', $associationId)
+                ->where('status', \App\Models\Membership::STATUS_PAID)->count(),
+            'contributionsCount' => \App\Models\Contribution::where('association_id', $associationId)->count(),
+            'expensesCount' => \App\Models\Expense::where('association_id', $associationId)->count(),
         ];
 
         // Compatibilidade

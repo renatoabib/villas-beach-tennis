@@ -31,16 +31,16 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between">
                         <div class="avtar avtar-s bg-light-success"><i class="ph-duotone ph-arrow-circle-up f-20"></i></div>
-                        <span class="badge bg-light-success">Entradas</span>
+                        <span class="badge bg-light-success">Entradas — Caixa (histórico)</span>
                     </div>
                     <h4 class="mt-3 mb-1 fw-semibold">
                         {{ number_format($financials['totalInflow'], 2, ',', '.') }}
                         <small class="text-muted">BRL</small>
                     </h4>
                     <div class="d-flex flex-wrap gap-1 mt-2">
-                        <span class="badge bg-light-secondary">Mensalidades: {{ number_format($financials['memberships'], 2, ',', '.') }}</span>
+                        <span class="badge bg-light-secondary">Mensalidades ({{ $financials['membershipsCount'] }} pagas): {{ number_format($financials['memberships'], 2, ',', '.') }}</span>
                         <span class="badge bg-light-secondary">Aportes: {{ number_format($financials['cotisations'], 2, ',', '.') }}</span>
-                        <span class="badge bg-light-secondary">Diárias: {{ number_format($financials['contributions'], 2, ',', '.') }}</span>
+                        <span class="badge bg-light-secondary">Diárias ({{ $financials['contributionsCount'] }}): {{ number_format($financials['contributions'], 2, ',', '.') }}</span>
                     </div>
                 </div>
             </div>
@@ -58,7 +58,7 @@
                         {{ number_format($financials['totalOutflow'], 2, ',', '.') }}
                         <small class="text-muted">BRL</small>
                     </h4>
-                    <p class="text-sm text-muted mt-2 mb-0">Total de despesas registradas</p>
+                    <p class="text-sm text-muted mt-2 mb-0">Total pago do caixa (histórico)</p>
                 </div>
             </div>
         </div>
