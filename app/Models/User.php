@@ -4,7 +4,7 @@ namespace App\Models;
 
 use BaconQrCode\Creator;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
-use BaconQrCode\Renderer\Svg\SvgBackEnd;
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
 use BaconQrCode\Writer;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -201,13 +201,12 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
     {
         $url = route('check.status', $this->member_number, absolute: true);
 
-        $renderer = new \BaconQrCode\Renderer\Image\Svg\SvgBackEnd();
-        $renderer->setRendererStyle(new RendererStyle(300, 300, margin: 10));
+        $rendererStyle = new RendererStyle(300, 10);
+        $backEnd = new SvgImageBackEnd();
+        $renderer = new ImageRenderer($rendererStyle, $backEnd);
 
         $writer = new Writer($renderer);
-        $result = $writer->write($url);
-
-        $contents = $result->getContents();
+        $contents = $writer->writeString($url);
 
         Storage::disk('public')->put("qrcodes/{$this->member_number}.svg", $contents);
     }
