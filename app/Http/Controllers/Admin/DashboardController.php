@@ -73,6 +73,18 @@ class DashboardController extends Controller
             $items->push(['date' => Carbon::parse($dateField), 'amount' => (float)$cb->amount]);
         }
 
+        // Saídas (despesas)
+        $expensesQuery = \App\Models\Expense::query();
+        if ($associationId) {
+            $expensesQuery->where('association_id', $associationId);
+        }
+
+        $outflowItems = collect();
+        foreach ($expensesQuery->get() as $e) {
+            $dateField = $e->spent_at ?? $e->created_at;
+            $outflowItems->push(['date' => Carbon::parse($dateField), 'amount' => (float)$e->amount]);
+        }
+
         $days30Map = [];
         for ($i = 30; $i >= 0; $i--) {
             $d = $now->copy()->subDays($i)->format('Y-m-d');
@@ -91,36 +103,52 @@ class DashboardController extends Controller
             $months365Map[$m] = 0.0;
         }
 
-        foreach ($items as $item) {
-            $dt = $item['date'];
-            $amt = $item['amount'];
+        $aggregate = function (iterable $entries, array $daysMap, array $m180Map, array $m365Map): array {
+            foreach ($entries as $entry) {
+                $dt = $entry['date'];
+                $amt = $entry['amount'];
 
-            $dKey = $dt->format('Y-m-d');
-            if (isset($days30Map[$dKey])) {
-                $days30Map[$dKey] += $amt;
+                $dKey = $dt->format('Y-m-d');
+                if (isset($daysMap[$dKey])) {
+                    $daysMap[$dKey] += $amt;
+                }
+
+                $mKey = $dt->format('Y-m');
+                if (isset($m180Map[$mKey])) {
+                    $m180Map[$mKey] += $amt;
+                }
+                if (isset($m365Map[$mKey])) {
+                    $m365Map[$mKey] += $amt;
+                }
             }
 
-            $mKey = $dt->format('Y-m');
-            if (isset($months180Map[$mKey])) {
-                $months180Map[$mKey] += $amt;
-            }
-            if (isset($months365Map[$mKey])) {
-                $months365Map[$mKey] += $amt;
-            }
-        }
+            return [$daysMap, $m180Map, $m365Map];
+        };
+
+        [$days30MapIn, $months180MapIn, $months365MapIn] = $aggregate($items, $days30Map, $months180Map, $months365Map);
+        [$days30MapOut, $months180MapOut, $months365MapOut] = $aggregate($outflowItems, $days30Map, $months180Map, $months365Map);
 
         return [
             '30' => [
                 'categories' => array_keys($days30Map),
-                'series' => [['name' => 'Entradas', 'data' => array_values($days30Map)]],
+                'series' => [
+                    ['name' => 'Entradas', 'data' => array_values($days30MapIn)],
+                    ['name' => 'Saídas', 'data' => array_values($days30MapOut)],
+                ],
             ],
             '180' => [
                 'categories' => array_keys($months180Map),
-                'series' => [['name' => 'Entradas', 'data' => array_values($months180Map)]],
+                'series' => [
+                    ['name' => 'Entradas', 'data' => array_values($months180MapIn)],
+                    ['name' => 'Saídas', 'data' => array_values($months180MapOut)],
+                ],
             ],
             '365' => [
                 'categories' => array_keys($months365Map),
-                'series' => [['name' => 'Entradas', 'data' => array_values($months365Map)]],
+                'series' => [
+                    ['name' => 'Entradas', 'data' => array_values($months365MapIn)],
+                    ['name' => 'Saídas', 'data' => array_values($months365MapOut)],
+                ],
             ],
         ];
     }

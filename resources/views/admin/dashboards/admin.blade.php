@@ -107,7 +107,7 @@
         <div class="col-lg-8">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Fluxo de Caixa (Entradas Consolidadas)</h5>
+                    <h5 class="mb-0">Fluxo de Caixa (Entradas × Saídas)</h5>
                     <select id="cashflow-range" class="form-select rounded-3 form-select-sm w-auto">
                         <option value="30">Últimos 30 Dias</option>
                         <option value="180" selected>Últimos 6 Meses</option>
@@ -288,7 +288,7 @@
             dataLabels: {
                 enabled: false
             },
-            colors: ['var(--bs-primary)'],
+            colors: ['var(--bs-primary)', 'var(--bs-danger)'],
             series: cashflowData['180'].series,
             xaxis: {
                 categories: cashflowData['180'].categories
