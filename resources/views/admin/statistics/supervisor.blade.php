@@ -65,7 +65,6 @@
                         <h5 class="mb-0">{{ $count }}</h5>
                     </div>
                 @endforeach
-                <div id="overview-bar-chart" class="mt-3"></div>
             </div>
         </div>
     </div>
@@ -113,9 +112,30 @@
             series: [{ name: 'New Members', data: memberGrowthData[val].data }]
         });
     });
+
+    // Reuniões: criadas vs concluídas (real)
+    new ApexCharts(document.querySelector("#yearly-summary-chart"), {
+        chart: { type: 'bar', height: 230, toolbar: { show: false } },
+        plotOptions: { bar: { borderRadius: 4, columnWidth: '40%', distributed: true } },
+        dataLabels: { enabled: false },
+        colors: ['#0d6efd', '#16a34a'],
+        series: [{ name: 'Reuniões', data: [@json($createdMeetings), @json($completedMeetings)] }],
+        xaxis: { categories: ['Criadas', 'Concluídas'] },
+        legend: { show: false }
+    }).render();
+
+    // Documentos enviados por mês (real)
+    new ApexCharts(document.querySelector("#monthly-report-graph"), {
+        chart: { type: 'bar', height: 230, toolbar: { show: false } },
+        plotOptions: { bar: { borderRadius: 4, columnWidth: '50%' } },
+        dataLabels: { enabled: false },
+        colors: ['#f59e0b'],
+        series: [{ name: 'Documentos', data: @json($cashflowValues) }],
+        xaxis: { categories: @json($cashflowLabels) },
+        yaxis: {
+            labels: { formatter: (val) => Number(val).toLocaleString('pt-BR') }
+        }
+    }).render();
 </script>
 
-<script src="{{ URL::asset('build/js/widgets/yearly-summary-chart.js') }}"></script>
-<script src="{{ URL::asset('build/js/widgets/monthly-report-graph.js') }}"></script>
-<script src="{{ URL::asset('build/js/widgets/overview-bar-chart.js') }}"></script>
 @endsection

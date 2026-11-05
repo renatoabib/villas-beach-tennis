@@ -17,8 +17,13 @@
                 <h5 class="mb-0"><i class="ph-duotone ph-wallet me-1"></i> My Cotisation Status (This Year)</h5>
             </div>
             <div class="card-body d-flex flex-column justify-content-between">
+                @php
+                    $myPaid = $myCotisations['paid'] ?? 0;
+                    $myTotalAll = $myPaid + ($myCotisations['pending'] ?? 0) + ($myCotisations['overdue'] ?? 0) + ($myCotisations['rejected'] ?? 0);
+                    $myPaidPercent = $myTotalAll > 0 ? round(($myPaid / $myTotalAll) * 100, 1) : 0;
+                @endphp
                 <div class="my-n4 text-center mx-auto" style="max-width: 150px">
-                    <div id="total-earning-chart-1"></div>
+                    <div id="total-earning-chart-1" data-percent="{{ $myPaidPercent }}"></div>
                 </div>
                 <div>
                     <div class="bg-body mt-4 py-2 px-3 rounded d-flex align-items-center justify-content-between">
@@ -58,13 +63,20 @@
                 </a>
             </div>
             <div class="card-body d-flex flex-column justify-content-between">
-                <div class="d-flex align-items-center justify-content-center mb-3">
-                    <i class="ph-duotone ph-star text-warning me-1"></i>
-                    <h3 class="mb-0">85% <small class="text-muted"> Complete</small></h3>
+                <div class="d-flex flex-column align-items-center justify-content-center mb-3 gap-2">
+                    <h3 class="mb-0">
+                        @if (auth()->user()->is_active)
+                            <span class="text-success">Ativo</span>
+                        @else
+                            <span class="text-danger">Inativo</span>
+                        @endif
+                    </h3>
+                    <p class="text-muted mb-0">
+                        Sócio desde {{ auth()->user()->created_at->format('m/Y') }}
+                    </p>
                 </div>
-                <div id="project-rating-chart"></div>
                 <div class="text-center mt-3">
-                    <p class="text-muted">Complete your profile to get the most out of your membership!</p>
+                    <p class="text-muted">Mantenha seus dados atualizados no perfil!</p>
                 </div>
             </div>
         </div>
@@ -115,8 +127,26 @@
 
 @section('scripts')
 <script src="{{ URL::asset('build/js/plugins/apexcharts.min.js') }}"></script>
-<script src="{{ URL::asset('build/js/widgets/total-earning-chart-1.js') }}"></script>
-<script src="{{ URL::asset('build/js/widgets/project-rating-chart.js') }}"></script>
+
+<script>
+    // Gauge: % de aportes pagos no ano (real)
+    const myPaidPercent = parseFloat(document.getElementById('total-earning-chart-1').dataset.percent) || 0;
+    new ApexCharts(document.querySelector("#total-earning-chart-1"), {
+        chart: { height: 150, type: 'radialBar' },
+        series: [myPaidPercent],
+        colors: ['#16a34a'],
+        plotOptions: {
+            radialBar: {
+                hollow: { size: '55%' },
+                dataLabels: {
+                    show: true,
+                    name: { show: false },
+                    value: { formatter: (val) => val.toFixed(1) + '%', offsetY: 7, fontSize: '18px', color: '#16a34a' }
+                },
+                track: { background: '#f1f5f9' }
+            }
+        }
+    }).render();
 
 <script>
     const chartData = {

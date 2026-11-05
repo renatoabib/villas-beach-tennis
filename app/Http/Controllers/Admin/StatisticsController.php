@@ -85,9 +85,15 @@ class StatisticsController extends Controller
         // Generate chart data
         $memberGrowthChartData = $this->generateMemberGrowthData();
 
-        // Memberships, Cotisations (aportes extras), & Contributions (diárias não-sócios)
+        // Memberships sums
         $membershipsPaidSum = \App\Models\Membership::where('status', \App\Models\Membership::STATUS_PAID)->sum('amount');
         $membershipsPendingSum = \App\Models\Membership::where('status', \App\Models\Membership::STATUS_PENDING)->sum('amount');
+        $membershipsOverdueRejectedSum = \App\Models\Membership::whereIn('status', [\App\Models\Membership::STATUS_OVERDUE, \App\Models\Membership::STATUS_CANCELLED])->sum('amount');
+
+        $membershipsTotalSum = $membershipsPaidSum + $membershipsPendingSum + $membershipsOverdueRejectedSum;
+        $membershipsPaidPercent = $membershipsTotalSum > 0
+            ? round(($membershipsPaidSum / $membershipsTotalSum) * 100, 1)
+            : 0;
         
         $cotisationsPaidMAD = \App\Models\Cotisation::where('status', 1)->sum('amount');
         $cotisationsPendingMAD = \App\Models\Cotisation::where('status', 0)->sum('amount');
@@ -138,6 +144,31 @@ class StatisticsController extends Controller
             ->orderBy('associations.name')
             ->get();
 
+        // Receitas consolidadas por clube (Mensalidades + Aportes + Diárias)
+        $associationsRevenue = \App\Models\Association::orderBy('name')
+            ->get()
+            ->map(function ($assoc) {
+                return [
+                    'name' => $assoc->name,
+                    'memberships' => (float) \App\Models\Membership::where('association_id', $assoc->id)
+                        ->where('status', \App\Models\Membership::STATUS_PAID)->sum('amount'),
+                    'cotisations' => (float) \App\Models\Cotisation::where('association_id', $assoc->id)
+                        ->where('status', 1)->sum('amount'),
+                    'contributions' => (float) \App\Models\Contribution::where('association_id', $assoc->id)
+                        ->sum('amount'),
+                ];
+            })
+            ->values()
+            ->toArray();
+
+        // Clubes registrados por ano (últimos 6 anos)
+        $associationsByYear = [];
+        for ($y = 5; $y >= 0; $y--) {
+            $year = now()->subYears($y)->year;
+            $associationsByYear['labels'][] = (string) $year;
+            $associationsByYear['data'][] = \App\Models\Association::whereYear('created_at', $year)->count();
+        }
+
         // Users by roles
         $rolesCounts = [
             'member' => \App\Models\User::role('member')->count(),
@@ -152,6 +183,8 @@ class StatisticsController extends Controller
             'memberGrowthChartData' => $memberGrowthChartData,
             'membershipsPaidSum' => $membershipsPaidSum,
             'membershipsPendingSum' => $membershipsPendingSum,
+            'membershipsOverdueRejectedSum' => $membershipsOverdueRejectedSum,
+            'membershipsPaidPercent' => $membershipsPaidPercent,
             'cotisationsPaidMAD' => $cotisationsPaidMAD,
             'cotisationsPendingMAD' => $cotisationsPendingMAD,
             'cotisationsOverdueRejectedMAD' => $cotisationsOverdueRejectedMAD,
@@ -163,6 +196,8 @@ class StatisticsController extends Controller
             'associationsTotal' => $associationsTotal,
             'associationsGrowthThisYear' => $associationsGrowthThisYear,
             'cotisationsByAssociation' => $cotisationsByAssociation,
+            'associationsRevenue' => $associationsRevenue,
+            'associationsByYear' => $associationsByYear,
             'rolesCounts' => $rolesCounts,
         ];
     }
@@ -224,6 +259,14 @@ class StatisticsController extends Controller
             ->where('status', \App\Models\Membership::STATUS_PAID)
             ->sum('amount');
 
+        $membershipsPendingSum = \App\Models\Membership::where('association_id', $associationId)
+            ->where('status', \App\Models\Membership::STATUS_PENDING)
+            ->sum('amount');
+
+        $membershipsOverdueRejectedSum = \App\Models\Membership::where('association_id', $associationId)
+            ->whereIn('status', [\App\Models\Membership::STATUS_OVERDUE, \App\Models\Membership::STATUS_CANCELLED])
+            ->sum('amount');
+
         $cotisationsPaidMAD = \App\Models\Cotisation::where('association_id', $associationId)
             ->where('status', 1)
             ->sum('amount');
@@ -238,9 +281,31 @@ class StatisticsController extends Controller
 
         $totalContributions = \App\Models\Contribution::where('association_id', $associationId)->sum('amount');
         $totalOutflow = \App\Models\Expense::where('association_id', $associationId)->sum('amount');
-        
+
+        // Diárias por mês (últimos 6 meses) — gráfico real
+        $contributionsLabels = [];
+        $contributionsValues = [];
+        $expensesLabels = [];
+        $expensesValues = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $monthStart = now()->startOfMonth()->subMonths($i);
+            $monthEnd = $monthStart->copy()->endOfMonth();
+            $contributionsLabels[] = $monthStart->format('M Y');
+            $contributionsValues[] = (float) \App\Models\Contribution::where('association_id', $associationId)
+                ->whereBetween('created_at', [$monthStart, $monthEnd])->sum('amount');
+            $expensesLabels[] = $monthStart->format('M Y');
+            $expensesValues[] = (float) \App\Models\Expense::where('association_id', $associationId)
+                ->whereBetween('spent_at', [$monthStart, $monthEnd])->sum('amount');
+        }
+
         $totalInflow = $membershipsPaidSum + $cotisationsPaidMAD + $totalContributions;
         $cashFlowDelta = $totalInflow - $totalOutflow;
+
+        // % do valor de mensalidades já pago (real, para o gauge)
+        $membershipsTotalSum = $membershipsPaidSum + $membershipsPendingSum + $membershipsOverdueRejectedSum;
+        $membershipsPaidPercent = $membershipsTotalSum > 0
+            ? round(($membershipsPaidSum / $membershipsTotalSum) * 100, 1)
+            : 0;
 
         // Combined Cashflow last 6 months (Memberships + Cotisations + Contributions)
         $months = 6;
@@ -284,11 +349,20 @@ class StatisticsController extends Controller
             'totalMembers' => $totalMembers,
             'memberGrowthThisYear' => $memberGrowthThisYear,
             'memberGrowthChartData' => $memberGrowthChartData,
+            'membershipsPaidSum' => $membershipsPaidSum,
+            'membershipsPendingSum' => $membershipsPendingSum,
+            'membershipsOverdueRejectedSum' => $membershipsOverdueRejectedSum,
+            'membershipsPaidPercent' => $membershipsPaidPercent,
             'cotisationsPaidMAD' => $cotisationsPaidMAD,
             'cotisationsPendingMAD' => $cotisationsPendingMAD,
             'cotisationsOverdueRejectedMAD' => $cotisationsOverdueRejectedMAD,
             'cashflowLabels' => $cashflowLabels,
             'cashflowValues' => collect($cashflowValues),
+            'contributionsLabels' => $contributionsLabels,
+            'contributionsValues' => $contributionsValues,
+            'expensesLabels' => $expensesLabels,
+            'expensesValues' => $expensesValues,
+            'totalContributions' => $totalContributions,
             'totalOutflowMAD' => $totalOutflowMAD,
             'totalInflowMAD' => $totalInflowMAD,
         ];
