@@ -222,8 +222,14 @@
         });
         compositionChart.render();
 
-        // Fluxo de Caixa (entradas consolidadas)
+        // Fluxo de Caixa (entradas x saídas + meta)
         const cashflowData = @json($cashflowData);
+
+        const buildCashflowSeries = (d) => [
+            { name: d.series[0].name, type: 'bar', data: d.series[0].data },
+            { name: d.series[1].name, type: 'bar', data: d.series[1].data },
+            { name: d.targetLabel, type: 'line', data: d.target }
+        ];
 
         const cashflowChart = new ApexCharts(document.querySelector("#cashflow-bar-chart"), {
             chart: {
@@ -235,14 +241,19 @@
             },
             plotOptions: {
                 bar: {
-                    borderRadius: 4
+                    borderRadius: 4,
+                    columnWidth: '45%'
                 }
             },
             dataLabels: {
                 enabled: false
             },
-            colors: ['var(--bs-primary)', 'var(--bs-danger)'],
-            series: cashflowData['180'].series,
+            colors: ['var(--bs-primary)', 'var(--bs-danger)', 'var(--bs-success)'],
+            stroke: {
+                width: [0, 0, 3],
+                dashArray: [0, 0, 7]
+            },
+            series: buildCashflowSeries(cashflowData['180']),
             xaxis: {
                 categories: cashflowData['180'].categories
             },
@@ -257,7 +268,7 @@
         document.getElementById('cashflow-range').addEventListener('change', function() {
             const range = this.value;
             cashflowChart.updateOptions({
-                series: cashflowData[range].series,
+                series: buildCashflowSeries(cashflowData[range]),
                 xaxis: {
                     categories: cashflowData[range].categories
                 }

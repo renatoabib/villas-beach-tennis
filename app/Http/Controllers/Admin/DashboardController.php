@@ -128,6 +128,16 @@ class DashboardController extends Controller
         [$days30MapIn, $months180MapIn, $months365MapIn] = $aggregate($items, $days30Map, $months180Map, $months365Map);
         [$days30MapOut, $months180MapOut, $months365MapOut] = $aggregate($outflowItems, $days30Map, $months180Map, $months365Map);
 
+        // Meta mensal: mensalidade fixa (R$ 50) x sócios ativos
+        $monthlyDue = 50.00;
+        $membersTargetQuery = User::where('is_active', true);
+        if ($associationId) {
+            $membersTargetQuery->where('association_id', $associationId);
+        }
+        $targetMembers = $membersTargetQuery->count();
+        $monthlyTarget = $targetMembers * $monthlyDue;
+        $dailyTarget = round($monthlyTarget / 30, 2);
+
         return [
             '30' => [
                 'categories' => array_keys($days30Map),
@@ -135,6 +145,8 @@ class DashboardController extends Controller
                     ['name' => 'Entradas', 'data' => array_values($days30MapIn)],
                     ['name' => 'Saídas', 'data' => array_values($days30MapOut)],
                 ],
+                'target' => array_fill(0, count($days30Map), $dailyTarget),
+                'targetLabel' => 'Meta diária (' . $targetMembers . ' sócios)',
             ],
             '180' => [
                 'categories' => array_keys($months180Map),
@@ -142,6 +154,8 @@ class DashboardController extends Controller
                     ['name' => 'Entradas', 'data' => array_values($months180MapIn)],
                     ['name' => 'Saídas', 'data' => array_values($months180MapOut)],
                 ],
+                'target' => array_fill(0, count($months180Map), $monthlyTarget),
+                'targetLabel' => 'Meta mensal (' . $targetMembers . ' × R$ 50)',
             ],
             '365' => [
                 'categories' => array_keys($months365Map),
@@ -149,6 +163,8 @@ class DashboardController extends Controller
                     ['name' => 'Entradas', 'data' => array_values($months365MapIn)],
                     ['name' => 'Saídas', 'data' => array_values($months365MapOut)],
                 ],
+                'target' => array_fill(0, count($months365Map), $monthlyTarget),
+                'targetLabel' => 'Meta mensal (' . $targetMembers . ' × R$ 50)',
             ],
         ];
     }
