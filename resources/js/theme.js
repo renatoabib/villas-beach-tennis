@@ -17,6 +17,21 @@ var rtl_flag = false;
 var dark_flag = false;
 const logoPath = '/assets/images/logo/villas.jpg';
 
+// Tema salvo do usuário (dark é o padrão do app)
+function get_saved_theme() {
+  try {
+    return localStorage.getItem('vbt-theme');
+  } catch (e) {
+    return null;
+  }
+}
+
+function save_theme(layout) {
+  try {
+    localStorage.setItem('vbt-theme', layout);
+  } catch (e) {}
+}
+
 function layout_change_default() {
   // Determine the initial layout based on the user's system preference for color scheme
   const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
@@ -189,6 +204,7 @@ function layout_rtl_change(value) {
 function layout_change(layout) {
   var control = document.querySelector('.pct-offcanvas');
   document.getElementsByTagName('body')[0].setAttribute('data-pc-theme', layout);
+  save_theme(layout);
 
   var btn_control = document.querySelector('.theme-layout .btn[data-value="default"]');
   if (btn_control) {

@@ -6,51 +6,20 @@
 <script src="{{ URL::asset('build/js/plugins/i18nextHttpBackend.min.js') }}"></script>
 <script src="{{ URL::asset('build/js/icon/custom-font.js') }}"></script>
 <script src="{{ URL::asset('build/js/script.js') }}"></script>
-<script src="{{ URL::asset('build/js/theme.js') }}?v=2"></script>
+<script src="{{ URL::asset('build/js/theme.js') }}?v=3"></script>
 <script src="{{ URL::asset('build/js/multi-lang.js') }}"></script>
 <script src="{{ URL::asset('build/js/plugins/feather.min.js') }}"></script>
 
-@if (env('APP_DARK_LAYOUT') == 'default')
+{{-- Tema: dark por padrão; escolha do usuário (topbar) persiste; light opcional --}}
 <script>
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        dark_layout = 'true';
-    } else {
-        dark_layout = 'false';
-    }
-    layout_change_default();
-    if (dark_layout == 'true') {
-        layout_change('dark');
-    } else {
-        layout_change('light');
-    }
+    (function () {
+        var saved = null;
+        try { saved = localStorage.getItem('vbt-theme'); } catch (e) {}
+        var theme = (saved === 'light') ? 'light' : 'dark';
+        layout_change(theme);
+        layout_sidebar_change(theme);
+    })();
 </script>
-@endif
-
-@if (env('APP_DARK_LAYOUT') != 'default')
-    @if (env('APP_DARK_LAYOUT') == 'true')
-        <script>
-            layout_change('dark');
-        </script>
-    @endif
-    @if (env('APP_DARK_LAYOUT') == false)
-        <script>
-            layout_change('light');
-        </script>
-    @endif
-@endif
-
-
-@if (env('APP_DARK_NAVBAR') == 'true')
-    <script>
-        layout_sidebar_change('dark');
-    </script>
-@endif
-
-@if (env('APP_DARK_NAVBAR') == false)
-    <script>
-        layout_sidebar_change('light');
-    </script>
-@endif
 
 @if (env('APP_BOX_CONTAINER') == false)
     <script>
